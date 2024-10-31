@@ -1,13 +1,17 @@
 openapi: "3.0.0"
 info:
-  title: "title name"
-  version: "version api"
-  description: "description"
+  title: "test"
+  version: "1.0.0"
+  description: "description1"
   contact:
-    name: "name contact"
-    url: "url T3"
+    name: "T3"
+    url: ".."
 servers:
   - url: "http://localhost:8801"
-  - url: "https://enpoint-test"
+  - url: "3"
+paths:
+  api/v1/test:
+    method: "GET"
+    
 security:
   - apiKey: []
