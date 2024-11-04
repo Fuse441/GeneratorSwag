@@ -11,10 +11,11 @@ app.post('/', async (req, res) => {
     try {
         const fileData = await ReadInit(); 
     // console.log(req.body.title);
-     const Result = ReplaceData(fileData,req)
-     CreateFileYAML(Result);
+     const {yamlData,fileName} = ReplaceData(fileData,req)
+    //  console.log(yamlData, fileName);
+     CreateFileYAML(yamlData,fileName);
    
-        res.send(Result);
+        res.send(yamlData);
     } catch (error) {
         console.error("Error processing file:", error); 
         res.status(500).send({ message: "Error reading file", error: error.message });

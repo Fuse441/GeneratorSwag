@@ -1,7 +1,7 @@
 const { application, response } = require('express');
 const fs = require('fs');
 const YAML = require('json-to-pretty-yaml');
-
+const appError = require('../../swaggers/structured/appError.json')
 function ReadInit() {
     return new Promise((resolve, reject) => {
         fs.readFile('swaggers/structured/openapi.json', 'utf8', (err, data) => {
@@ -21,7 +21,7 @@ function ReadInit() {
     });
 } function ReplaceData(content, requests) {
     const obj = JSON.parse(JSON.stringify(content));
-
+    let fileName = ""
 
     obj.info.title = requests.body.title;
     obj.info.version = requests.body.version;
@@ -42,6 +42,8 @@ function ReadInit() {
 
             }
         };
+        fileName = key
+        // console.log("log fileName : " + fileName)
         // delete obj.paths[key].method;
         // console.log(typeof requests.headers)
 
@@ -61,35 +63,35 @@ function ReadInit() {
 
         for (const item in requests.body.paths[key].body) {
             const responseData = {
-                
-                    description: "test",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "string",
-                                example: "stom"
-                            }
+
+                description: "test",
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "string",
+                            example: "stom"
                         }
                     }
-                
-
+                }
             };
-
             try {
-               
                 obj.paths[key][method].responses[item] = responseData;
+                // console.log(appError)
             } catch (error) {
-                console.log("catch : ",error)
+                console.log("catch : ", error)
             }
-            
+
+        }
+        for (const item in appError) {
+            console.log(item)
+            // obj.paths[key][method].responses[item] = 
         }
     };
 
 
 
     const yamlData = YAML.stringify(obj);
-    return yamlData;
-
+    return { yamlData, fileName };
 
 }
 
@@ -98,14 +100,17 @@ function ReadInit() {
 
 
 
-function CreateFileYAML(content) {
+function CreateFileYAML(content, fileName) {
     // console.log("Content to write:", content); 
     try {
         if (!content) {
             console.error("No content provided to CreateFileYAML");
             return;
         }
-        fs.writeFileSync('swaggers/test1.yaml', content);
+        // const path = "/api/v1/communicationMessage";
+        const afterV1 = fileName.split('/v1/')[1];
+
+        fs.writeFileSync(`swaggers/${afterV1}.yaml`, content);
         console.log("YAML file created successfully");
     } catch (err) {
         console.error("Error writing file:", err);
