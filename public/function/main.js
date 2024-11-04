@@ -1,3 +1,4 @@
+const { application, response } = require('express');
 const fs = require('fs');
 const YAML = require('json-to-pretty-yaml');
 
@@ -18,41 +19,84 @@ function ReadInit() {
             }
         });
     });
-}
-function ReplaceData(content, requests) {
+} function ReplaceData(content, requests) {
     const obj = JSON.parse(JSON.stringify(content));
-    obj.info.title = requests.body.title
-    obj.info.version = requests.body.version
-    obj.info.description = requests.body.description
-    obj.info.contact = requests.body.contact
-
-    const addUrl = requests.body.servers.map(item => {
-        return { url: item };
-    });
-    obj.servers = Object.assign(addUrl, obj.servers)
-    obj.paths = requests.body.paths
-    for (const key in obj.paths) {
-        obj.paths[key].method = requests.body.paths[key].method.replace(/['"]+/g, '');
-        console.log(obj.paths[key].method)     
-    }
-   
-    const headers = requests.headers
 
 
-    // for (const item in headers) {
-    //     console.log("item in header : " + item)
-    //     console.log("value : " + headers[item])
-    // }
-    const body = requests.body
-
-    //set header
+    obj.info.title = requests.body.title;
+    obj.info.version = requests.body.version;
+    obj.info.description = requests.body.description;
+    obj.info.contact = requests.body.contact;
 
 
-    // console.log(requests.body.paths['api/v1/communicationMessage'])
+    obj.servers = requests.body.servers.map(item => ({ url: item }));
+
+
+    obj.paths = {};
+    for (const key in requests.body.paths) {
+        const method = requests.body.paths[key].method.toLowerCase().replace(/['"]+/g, '');
+        obj.paths[key] = {
+            [method]: {
+                parameters: [],
+                responses: {}
+
+            }
+        };
+        // delete obj.paths[key].method;
+        // console.log(typeof requests.headers)
+
+        for (const item in requests.headers) {
+            const objectParamerter = {
+                in: "header",
+                name: item,
+                schema: {
+                    type: typeof item
+                },
+                required: true,
+                description: "test"
+            }
+            obj.paths[key][method].parameters.push(objectParamerter)
+        }
+
+
+        for (const item in requests.body.paths[key].body) {
+            const responseData = {
+                
+                    description: "test",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "string",
+                                example: "stom"
+                            }
+                        }
+                    }
+                
+
+            };
+
+            try {
+               
+                obj.paths[key][method].responses[item] = responseData;
+            } catch (error) {
+                console.log("catch : ",error)
+            }
+            
+        }
+    };
+
+
+
     const yamlData = YAML.stringify(obj);
-    return yamlData
+    return yamlData;
+
 
 }
+
+
+
+
+
 
 function CreateFileYAML(content) {
     // console.log("Content to write:", content); 
