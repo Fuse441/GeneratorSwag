@@ -1,6 +1,4 @@
-curl -L -X POST 'localhost:25565/' \
--H 'Content-Type: application/json' \
---data-raw '{
+{
     "title": "test",
     "version": "1.0.0",
     "description": "description1",
@@ -16,6 +14,13 @@ curl -L -X POST 'localhost:25565/' \
         "/api/v1/communicationMessage": {
             "method": "GET",
             "tags": [],
+            "header" : {
+                "transaction" : "asd1234",
+                "transaction2" : "123444" 
+            },
+            "requestBody": {
+                "test": 1
+            },
             "body": {
                 "200": {
                     "@type": "CancelStockReservation_FVO",
@@ -26,8 +31,6 @@ curl -L -X POST 'localhost:25565/' \
                         "id": "AA240816120004",
                         "@type": "ReserveStockRef"
                     }
-
-                    
                 },
                 "201": {
                     "@type": "CancelStockReservation_FVO",
@@ -42,4 +45,4 @@ curl -L -X POST 'localhost:25565/' \
             }
         }
     }
-}'
+}

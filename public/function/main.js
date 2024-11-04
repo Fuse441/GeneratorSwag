@@ -1,7 +1,8 @@
 const { application, response } = require('express');
 const fs = require('fs');
 const YAML = require('json-to-pretty-yaml');
-const appError = require('../../swaggers/structured/appError.json')
+const appError = require('../../swaggers/structured/appError.json');
+const { type } = require('os');
 function ReadInit() {
     return new Promise((resolve, reject) => {
         fs.readFile('swaggers/structured/openapi.json', 'utf8', (err, data) => {
@@ -34,20 +35,19 @@ function ReadInit() {
 
     obj.paths = {};
     for (const key in requests.body.paths) {
+        fileName = key
         const method = requests.body.paths[key].method.toLowerCase().replace(/['"]+/g, '');
         obj.paths[key] = {
             [method]: {
+                requestBody: {
+                },
                 parameters: [],
                 responses: {}
 
             }
         };
-        fileName = key
-        // console.log("log fileName : " + fileName)
-        // delete obj.paths[key].method;
-        // console.log(typeof requests.headers)
-
-        for (const item in requests.headers) {
+        
+        for (const item in requests.body.paths[key].header) {
             const objectParamerter = {
                 in: "header",
                 name: item,
@@ -61,6 +61,40 @@ function ReadInit() {
         }
 
 
+
+
+
+
+
+
+        for (const item in requests.body.paths[key].requestBody) {
+            const objectResponseBody = {
+                required: true, 
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            properties: {
+                                [item]: { 
+                                    type: typeof item 
+                                }
+                            },
+                            required: [
+                                item
+                            ] 
+                        }
+                    }
+                }
+            };
+        
+          
+          
+            obj.paths[key][method].requestBody = objectResponseBody;
+        }
+        
+
+
+
         for (const item in requests.body.paths[key].body) {
             const responseData = {
 
@@ -68,15 +102,33 @@ function ReadInit() {
                 content: {
                     "application/json": {
                         schema: {
-                            type: "string",
-                            example: "stom"
+                            type: "object",
+                            properties: {
+                                
+                            }
                         }
                     }
                 }
             };
+
+            // responseData.content['application/json'].schema.properties = "asd"
+            
+            //  console.log("logs : "+JSON.stringify(requests.body.paths[key].body[item]))
+             const resBody = requests.body.paths[key].body[item]
+             console.log(resBody)
+            for (const key in resBody) {
+                const objectBody = {
+                    
+                       type: typeof key,
+                       description : "test" 
+                    
+                }
+                
+                responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
+            }
             try {
                 obj.paths[key][method].responses[item] = responseData;
-                // console.log(appError)
+              
             } catch (error) {
                 console.log("catch : ", error)
             }
@@ -84,7 +136,7 @@ function ReadInit() {
         }
         for (const item in appError) {
             console.log(item)
-            // obj.paths[key][method].responses[item] = 
+
         }
     };
 

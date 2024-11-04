@@ -12,57 +12,26 @@ servers:
 paths:
   /api/v1/communicationMessage:
     get:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                test:
+                  type: "string"
+              required:
+                - "test"
       parameters:
         - in: "header"
-          name: "content-type"
+          name: "transaction"
           schema:
             type: "string"
           required: true
           description: "test"
         - in: "header"
-          name: "user-agent"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "accept"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "cache-control"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "postman-token"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "host"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "accept-encoding"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "connection"
-          schema:
-            type: "string"
-          required: true
-          description: "test"
-        - in: "header"
-          name: "content-length"
+          name: "transaction2"
           schema:
             type: "string"
           required: true
@@ -73,14 +42,44 @@ paths:
           content:
             application/json:
               schema:
-                type: "string"
-                example: "stom"
+                type: "object"
+                properties:
+                  '@type':
+                    type: "string"
+                    description: "test"
+                  'cancellationReason':
+                    type: "string"
+                    description: "test"
+                  'effectiveCancellationDate':
+                    type: "string"
+                    description: "test"
+                  'requestedCancellationDate':
+                    type: "string"
+                    description: "test"
+                  'reserveStock':
+                    type: "string"
+                    description: "test"
         201:
           description: "test"
           content:
             application/json:
               schema:
-                type: "string"
-                example: "stom"
+                type: "object"
+                properties:
+                  '@type':
+                    type: "string"
+                    description: "test"
+                  'cancellationReason':
+                    type: "string"
+                    description: "test"
+                  'effectiveCancellationDate':
+                    type: "string"
+                    description: "test"
+                  'requestedCancellationDate':
+                    type: "string"
+                    description: "test"
+                  'reserveStock':
+                    type: "string"
+                    description: "test"
 security:
   - apiKey: []
