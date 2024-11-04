@@ -1,0 +1,45 @@
+curl -L -X POST 'localhost:25565/' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "title": "test",
+    "version": "1.0.0",
+    "description": "description1",
+    "contact": {
+        "name": "T3",
+        "url": ".."
+    },
+    "servers": [
+        "http://api.example.com/v1",
+        "http://api.example.com/v1"
+    ],
+    "paths": {
+        "/api/v1/communicationMessage": {
+            "method": "GET",
+            "tags": [],
+            "body": {
+                "200": {
+                    "@type": "CancelStockReservation_FVO",
+                    "cancellationReason": "string",
+                    "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
+                    "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
+                    "reserveStock": {
+                        "id": "AA240816120004",
+                        "@type": "ReserveStockRef"
+                    }
+
+                    
+                },
+                "201": {
+                    "@type": "CancelStockReservation_FVO",
+                    "cancellationReason": "string",
+                    "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
+                    "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
+                    "reserveStock": {
+                        "id": "AA240816120004",
+                        "@type": "ReserveStockRef"
+                    }
+                }
+            }
+        }
+    }
+}'
