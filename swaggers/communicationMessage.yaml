@@ -13,7 +13,7 @@ paths:
   /api/v1/communicationMessage:
     get:
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -36,50 +36,42 @@ paths:
             type: "string"
           required: true
           description: "test"
+        - in: "header"
+          name: "testRequest"
+          schema:
+            type: "string"
+          required: false
+          description: "test"
+        - in: "header"
+          name: "testRequest2"
+          schema:
+            type: "string"
+          required: false
+          description: "test"
       responses:
         200:
-          description: "test"
+          description: "case 200"
+          headers:
+            content-type:
+              description: "content-type"
+              required: true
+              schema:
+                type: "string"
+                example: "application/json"
           content:
             application/json:
               schema:
                 type: "object"
                 properties:
                   '@type':
-                    type: "string"
-                    description: "test"
+                    example: "CancelStockReservation_FVO"
                   'cancellationReason':
-                    type: "string"
-                    description: "test"
+                    example: "string"
                   'effectiveCancellationDate':
-                    type: "string"
-                    description: "test"
+                    example: "2024-07-30T05:12:24.597Z"
                   'requestedCancellationDate':
-                    type: "string"
-                    description: "test"
+                    example: "2024-07-30T05:12:24.597Z"
                   'reserveStock':
-                    type: "string"
-                    description: "test"
-        201:
-          description: "test"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  '@type':
-                    type: "string"
-                    description: "test"
-                  'cancellationReason':
-                    type: "string"
-                    description: "test"
-                  'effectiveCancellationDate':
-                    type: "string"
-                    description: "test"
-                  'requestedCancellationDate':
-                    type: "string"
-                    description: "test"
-                  'reserveStock':
-                    type: "string"
-                    description: "test"
+                    example: "[object Object]"
 security:
   - apiKey: []

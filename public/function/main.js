@@ -121,13 +121,14 @@ function ReadInit() {
 
 
         for (const item in requests.body.paths[key].response) {
+            console.log()
             const responseData = {
 
-                description: "test",
-                headers : {
-                    
+                description: requests.body.paths[key].response[item].description,
+                headers: {
+
                 },
-                     
+
                 content: {
                     "application/json": {
                         schema: {
@@ -144,22 +145,62 @@ function ReadInit() {
 
             //  console.log("logs : "+JSON.stringify(requests.body.paths[key].body[item]))
             const res = requests.body.paths[key].response[item]
-            // console.log(res.header)
-            for (const key in res.header) {
-                console.log(key)
-                const objectHeader  = {
-                    description : [key],
-                    
-                }
-            }
-            //     responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
-            // }
-            // try {
-            //     obj.paths[key][method].responses[item] = responseData;
 
-            // } catch (error) {
-            //     console.log("catch : ", error)
-            // }
+            for (const key in res.require.header) {
+                const value = res.require.header[key];
+                const objectHeader = {
+                    description: key,
+                    required: true,
+                    schema: {
+                        type: typeof value,
+                        example: value
+                    }
+
+                }
+                responseData.headers[key] = objectHeader
+            }
+
+            for (const key in res.require.body) {
+                const value = res.require.body[key];
+                const objectBody = {
+                    example: value
+                };
+                // console.log("log object:", key, "value:", value);
+                responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
+            }
+
+
+            for (const key in res.nonRquire.header) {
+                const value = res.nonRquire.header[key];
+                const objectHeader = {
+                    description: key,
+                    required: true,
+                    schema: {
+                        type: typeof value,
+                        example: value
+                    }
+
+                }
+                responseData.headers[key] = objectHeader
+            }
+
+            for (const key in res.nonRquire.body) {
+                const value = res.nonRquire.body[key];
+                
+                const objectBody = {
+                    example:  checkAndAct(value.toString())
+                };
+                // console.log("log object:", key, "value:", value);
+
+                responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
+            }
+
+            try {
+                obj.paths[key][method].responses[item] = responseData;
+
+            } catch (error) {
+                console.log("catch : ", error)
+            }
 
         }
         // for (const item in appError) {
@@ -176,7 +217,23 @@ function ReadInit() {
 }
 
 
+function checkAndAct(text) {
+    if(typeof text == object){
+        for (const item in text) {
+            
+        }
+    }else{
 
+    }
+    if (text.includes('@')) {
+   
+       return `'${text}'`
+      
+    } else {
+       return text
+            
+    }
+}
 
 
 
