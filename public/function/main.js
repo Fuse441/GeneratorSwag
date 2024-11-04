@@ -187,8 +187,9 @@ function ReadInit() {
             for (const key in res.nonRquire.body) {
                 const value = res.nonRquire.body[key];
                 
+                // console.log(checkAndAct(value))
                 const objectBody = {
-                    example:  checkAndAct(value.toString())
+                    example:  checkAndAct(value)
                 };
                 // console.log("log object:", key, "value:", value);
 
@@ -218,22 +219,23 @@ function ReadInit() {
 
 
 function checkAndAct(text) {
-    if(typeof text == object){
-        for (const item in text) {
-            
+    console.log(typeof text);
+    if (typeof text === 'object' && text !== null) { 
+        const object = {};
+        for (const key in text) {
+            if (key.includes('@')) {
+               
+                object[key] = `text[key]`;
+            }else{
+                object[key] = text[key];   
+            }
         }
-    }else{
-
+        console.log("log object: " + JSON.stringify(object));
+        return object;
     }
-    if (text.includes('@')) {
-   
-       return `'${text}'`
-      
-    } else {
-       return text
-            
-    }
+    return text;
 }
+
 
 
 
