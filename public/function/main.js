@@ -46,8 +46,8 @@ function ReadInit() {
 
             }
         };
-        
-        for (const item in requests.body.paths[key].header) {
+
+        for (const item in requests.body.paths[key].require.header) {
             const objectParamerter = {
                 in: "header",
                 name: item,
@@ -59,52 +59,81 @@ function ReadInit() {
             }
             obj.paths[key][method].parameters.push(objectParamerter)
         }
-
-
-
-
-
-
-
-
-        for (const item in requests.body.paths[key].requestBody) {
+        for (const item in requests.body.paths[key].require.body) {
             const objectResponseBody = {
-                required: true, 
+                required: true,
                 content: {
                     "application/json": {
                         schema: {
                             type: "object",
                             properties: {
-                                [item]: { 
-                                    type: typeof item 
+                                [item]: {
+                                    type: typeof item
                                 }
                             },
                             required: [
                                 item
-                            ] 
+                            ]
                         }
                     }
                 }
             };
-        
-          
-          
-            obj.paths[key][method].requestBody = objectResponseBody;
+            for (const item in requests.body.paths[key].request.header) {
+                const objectParamerter = {
+                    in: "header",
+                    name: item,
+                    schema: {
+                        type: typeof item
+                    },
+                    required: false,
+                    description: "test"
+                }
+                obj.paths[key][method].parameters.push(objectParamerter)
+            }
+
+            for (const item in requests.body.paths[key].request.body) {
+                const objectResponseBody = {
+                    required: false,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    [item]: {
+                                        type: typeof item
+                                    }
+                                },
+                                required: [
+                                    item
+                                ]
+                            }
+                        }
+                    }
+                };
+
+
+
+
+                obj.paths[key][method].requestBody = objectResponseBody;
+            }
+
         }
-        
 
 
-
-        for (const item in requests.body.paths[key].body) {
+        for (const item in requests.body.paths[key].response) {
             const responseData = {
 
                 description: "test",
+                headers : {
+                    
+                },
+                     
                 content: {
                     "application/json": {
                         schema: {
                             type: "object",
                             properties: {
-                                
+
                             }
                         }
                     }
@@ -112,32 +141,31 @@ function ReadInit() {
             };
 
             // responseData.content['application/json'].schema.properties = "asd"
-            
+
             //  console.log("logs : "+JSON.stringify(requests.body.paths[key].body[item]))
-             const resBody = requests.body.paths[key].body[item]
-             console.log(resBody)
-            for (const key in resBody) {
-                const objectBody = {
-                    
-                       type: typeof key,
-                       description : "test" 
+            const res = requests.body.paths[key].response[item]
+            // console.log(res.header)
+            for (const key in res.header) {
+                console.log(key)
+                const objectHeader  = {
+                    description : [key],
                     
                 }
-                
-                responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
             }
-            try {
-                obj.paths[key][method].responses[item] = responseData;
-              
-            } catch (error) {
-                console.log("catch : ", error)
-            }
+            //     responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
+            // }
+            // try {
+            //     obj.paths[key][method].responses[item] = responseData;
+
+            // } catch (error) {
+            //     console.log("catch : ", error)
+            // }
 
         }
-        for (const item in appError) {
-            console.log(item)
+        // for (const item in appError) {
+        //     console.log(item)
 
-        }
+        // }
     };
 
 

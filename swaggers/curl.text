@@ -1,4 +1,6 @@
-{
+curl -L -X POST 'localhost:25565/' \
+-H 'Content-Type: application/json' \
+--data-raw '{
     "title": "test",
     "version": "1.0.0",
     "description": "description1",
@@ -14,35 +16,46 @@
         "/api/v1/communicationMessage": {
             "method": "GET",
             "tags": [],
-            "header" : {
-                "transaction" : "asd1234",
-                "transaction2" : "123444" 
-            },
-            "requestBody": {
-                "test": 1
-            },
-            "body": {
-                "200": {
-                    "@type": "CancelStockReservation_FVO",
-                    "cancellationReason": "string",
-                    "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
-                    "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
-                    "reserveStock": {
-                        "id": "AA240816120004",
-                        "@type": "ReserveStockRef"
-                    }
+            "require": {
+                "header": {
+                    "transaction": "asd1234",
+                    "transaction2": "123444"
                 },
-                "201": {
-                    "@type": "CancelStockReservation_FVO",
-                    "cancellationReason": "string",
-                    "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
-                    "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
-                    "reserveStock": {
-                        "id": "AA240816120004",
-                        "@type": "ReserveStockRef"
+                "body": {
+                    "test": 1
+                }
+            },
+            "request": {
+                "header": {
+                    "testRequest": "testRequest",
+                    "testRequest2": "testRequest"
+                },
+                "body": {
+                    "test": 1
+                }
+            },
+            "response": {
+                "require" : {
+
+                },
+                ""
+                "200": {
+                    "header": {
+                        "content-type" : "application/json"
+                    },
+                    "body": {
+                        "@type": "CancelStockReservation_FVO",
+                        "cancellationReason": "string",
+                        "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
+                        "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
+                        "reserveStock": {
+                            "id": "AA240816120004",
+                            "@type": "ReserveStockRef"
+                        }
                     }
                 }
+               
             }
         }
     }
-}
+}'
