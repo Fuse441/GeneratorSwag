@@ -79,6 +79,8 @@ paths:
                 properties:
                   '@type':
                     example: "CancelStockReservation_FVO"
+                  '@type1':
+                    example: "CancelStockReservation_FVO"
                   'cancellationReason':
                     example: "string"
                   'effectiveCancellationDate':
@@ -89,5 +91,8 @@ paths:
                     example:
                       id: "AA240816120004"
                       '@type': "ReserveStockRef"
+                required:
+                  - "@type"
+                  - "@type1"
 security:
   - apiKey: []

@@ -129,7 +129,8 @@ obj.paths[key][method].requestBody.content['application/json'].schema.properties
                         type: "object",
                         properties: {
 
-                        }
+                        },
+                        required: []
                     }
                 }
             }
@@ -159,7 +160,7 @@ obj.paths[key][method].requestBody.content['application/json'].schema.properties
             const objectBody = {
                 example: value
             };
-            // console.log("log object:", key, "value:", value);
+            responseData.content['application/json'].schema.required.push(key)
             responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
         }
 
@@ -187,6 +188,7 @@ obj.paths[key][method].requestBody.content['application/json'].schema.properties
             };
             // console.log("log object:", key, "value:", value);
 
+             
             responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
         }
 
@@ -254,7 +256,7 @@ function CreateFileYAML(content, fileName) {
         const afterV1 = fileName.split('/v1/')[1];
 
         fs.writeFileSync(`swaggers/${afterV1}.yaml`, content);
-        console.log("YAML file created successfully");
+        // console.log("YAML file created successfully");
     } catch (err) {
         console.error("Error writing file:", err);
         throw err;

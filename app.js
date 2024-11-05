@@ -15,7 +15,7 @@ app.post('/', async (req, res) => {
     //  console.log(yamlData, fileName);
      CreateFileYAML(yamlData,fileName);
    
-        res.send(yamlData);
+        res.send({message : "YAML file created successfully"});
     } catch (error) {
         console.error("Error processing file:", error); 
         res.status(500).send({ message: "Error reading file", error: error.message });
