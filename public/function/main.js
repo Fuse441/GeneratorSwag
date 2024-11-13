@@ -68,19 +68,24 @@ function ReadInit() {
             }
             obj.paths[key][method].parameters.push(objectParamerter)
         }
+        // console.log("log check " + Object.keys(requests.body.paths[key].require.body).length)
+        if(Object.keys(requests.body.paths[key].require.body).length != 0){
         for (const item in requests.body.paths[key].require.body) {
             const objectResponseBody = {
 
                 type: typeof item,
                 example: requests.body.paths[key].require.body[item]
-            
-        }
-        
-        obj.paths[key][method].requestBody.content['application/json'].schema.required.push(item)
 
-obj.paths[key][method].requestBody.content['application/json'].schema.properties[item] = objectResponseBody
+            }
+
+            obj.paths[key][method].requestBody.content['application/json'].schema.required.push(item)
+
+            obj.paths[key][method].requestBody.content['application/json'].schema.properties[item] = objectResponseBody
 
         }
+    }else{
+        delete  obj.paths[key][method].requestBody.content['application/json'].schema.required
+    }
         for (const item in requests.body.paths[key].request.header) {
             const objectParamerter = {
                 in: "header",
@@ -94,171 +99,179 @@ obj.paths[key][method].requestBody.content['application/json'].schema.properties
             obj.paths[key][method].parameters.push(objectParamerter)
         }
 
+
         for (const item in requests.body.paths[key].request.body) {
             const value = requests.body.paths[key].request.body[item];
             let objectResponseBody = {};
-        
+
             if (Array.isArray(value)) {
                 objectResponseBody = {
                     type: "array",
                     example: []
                 };
-        
+
                 for (const element of value) {
                     let formattedElement = {};
-        
+
                     for (const key in element) {
                         const formattedKey = key.includes("@") ? `'${key}'` : key;
                         formattedElement[formattedKey] = element[key];
                     }
-        
+
                     objectResponseBody.example.push(formattedElement);
                 }
-            } 
+            }
             else if (typeof value === "object" && value !== null) {
                 objectResponseBody = {
                     type: "object",
                     properties: {}
                 };
-        
+
                 for (const subKey in value) {
                     const formattedSubKey = subKey.includes("@") ? `'${subKey}'` : subKey;
-        
+
                     objectResponseBody.properties[formattedSubKey] = {
                         type: typeof value[subKey],
                         example: value[subKey]
                     };
                 }
-            } 
+            }
             else {
                 objectResponseBody = {
                     type: typeof value,
                     example: value
                 };
             }
-        
+
             obj.paths[key][method].requestBody.content['application/json'].schema.properties[item] = objectResponseBody;
         }
-        
-    
 
 
 
 
 
-    for (const item in requests.body.paths[key].response) {
-        console.log()
-        const responseData = {
+        // console.log("log res : " +  JSON.stringify(Object.keys(requests.body.paths[key].response).length))
+      
+            for (const item in requests.body.paths[key].response) {
 
-            description: requests.body.paths[key].response[item].description,
-            headers: {
+                // console.log("item : check" + item)
+                const responseData = {
 
-            },
+                    description: requests.body.paths[key].response[item].description,
+                    headers: {
 
-            content: {
-                "application/json": {
-                    schema: {
-                        type: "object",
-                        properties: {
+                    },
 
-                        },
-                        required: []
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+
+                                },
+                                required: []
+                            }
+                        }
+                    }
+                };
+
+
+
+                const res = requests.body.paths[key].response[item]
+                if (Object.keys(res.require.header).length != 0) {
+                    for (const key in res.require.header) {
+
+                        const value = res.require.header[key];
+                        const objectHeader = {
+                            description: key,
+                            required: true,
+                            schema: {
+                                type: typeof value,
+                                example: value
+                            }
+
+                        }
+                        responseData.headers[key] = objectHeader
                     }
                 }
+                else {
+                    // responseData.content['application/json'].schema.header[`'${key.toString()}'`] = objectBody
+                }
+                if(Object.keys(res.require.body).length != 0){
+                for (const key in res.require.body) {
+                    const value = res.require.body[key];
+
+                    const objectBody = {
+                        example: value
+                    };
+
+                    responseData.content['application/json'].schema.required.push(key)
+                    responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
+                }
+            }else{
+               delete responseData.content['application/json'].schema.required  
+            //    console.log("check log : " + Object.keys(res.require.body).length) 
             }
-        };
 
-        // responseData.content['application/json'].schema.properties = "asd"
+                for (const key in res.nonRquire.header) {
+                    const value = res.nonRquire.header[key];
+                    const objectHeader = {
+                        description: key,
+                        required: true,
+                        schema: {
+                            type: typeof value,
+                            example: value
+                        }
 
-        //  console.log("logs : "+JSON.stringify(requests.body.paths[key].body[item]))
-        const res = requests.body.paths[key].response[item]
-
-        for (const key in res.require.header) {
-            const value = res.require.header[key];
-            const objectHeader = {
-                description: key,
-                required: true,
-                schema: {
-                    type: typeof value,
-                    example: value
+                    }
+                    responseData.headers[key] = objectHeader
                 }
 
-            }
-            responseData.headers[key] = objectHeader
-        }
+                for (const key in res.nonRquire.body) {
+                    const value = res.nonRquire.body[key];
+                    // console.log("check value : " + JSON.stringify(value) + " = " + JSON.stringify(typeof value));
 
-        for (const key in res.require.body) {
-            const value = res.require.body[key];
-            
-            const objectBody = {
-                example: value
-            };
-            
-            responseData.content['application/json'].schema.required.push(key)
-            responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
-        }
+                    let objectBody;
 
+                    if (Array.isArray(value)) {
 
-        for (const key in res.nonRquire.header) {
-            const value = res.nonRquire.header[key];
-            const objectHeader = {
-                description: key,
-                required: true,
-                schema: {
-                    type: typeof value,
-                    example: value
+                        objectBody = {
+                            example: value.map(item => checkAndAct(item))
+                        };
+                    } else if (typeof value === "object" && value !== null) {
+                        objectBody = {
+                            example: checkAndAct(value)
+                        };
+                    } else if (typeof value === "string") {
+                        objectBody = {
+                            example: checkAndAct(value)
+                        };
+                    } else {
+                        objectBody = {
+                            example: value
+                        };
+                    }
+
+                    responseData.content['application/json'].schema.properties[key] = objectBody;
                 }
 
-            }
-            responseData.headers[key] = objectHeader
-        }
+                try {
+                    obj.paths[key][method].responses[item] = responseData;
+                } catch (error) {
+                    console.log("catch : ", error);
+                }
 
-        for (const key in res.nonRquire.body) {
-            const value = res.nonRquire.body[key];
-            // console.log("check value : " + JSON.stringify(value) + " = " + JSON.stringify(typeof value));
-        
-            let objectBody;
-        
-            if (Array.isArray(value)) {
-               
-                objectBody = {
-                    example: value.map(item => checkAndAct(item))
-                };
-            } else if (typeof value === "object" && value !== null) {
-                objectBody = {
-                    example: checkAndAct(value)
-                };
-            } else if (typeof value === "string") {
-                objectBody = {
-                    example: checkAndAct(value)
-                };
-            } else {
-                objectBody = {
-                    example: value
-                };
+
             }
         
-            responseData.content['application/json'].schema.properties[key] = objectBody;
-        }
-        
-        try {
-            obj.paths[key][method].responses[item] = responseData;
-        } catch (error) {
-            console.log("catch : ", error);
-        }
-        
 
-    }
-    // for (const item in appError) {
-    //     console.log(item)
 
-    // }
-};
+    };
 
 
 
-const yamlData = YAML.stringify(obj);
-return { yamlData, fileName };
+    const yamlData = YAML.stringify(obj);
+    return { yamlData, fileName };
 
 }
 
