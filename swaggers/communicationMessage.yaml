@@ -27,11 +27,18 @@ paths:
                 test3:
                   type: "string"
                   example: 1
+                ArrayTest:
+                  type: "array"
+                  example:
+                    - id: "Arr1"
+                      '@type': "ReserveStockRef1"
+                    - id: "Arr2"
+                      '@type': "ReserveStockRef2"
                 test:
-                  type: "string"
+                  type: "number"
                   example: 1
                 asd:
-                  type: "string"
+                  type: "number"
                   example: 2
               required:
                 - "test1"
@@ -81,16 +88,22 @@ paths:
                     example: "CancelStockReservation_FVO"
                   '@type1':
                     example: "CancelStockReservation_FVO"
-                  'cancellationReason':
+                  cancellationReason:
                     example: "string"
-                  'effectiveCancellationDate':
+                  effectiveCancellationDate:
                     example: "2024-07-30T05:12:24.597Z"
-                  'requestedCancellationDate':
+                  requestedCancellationDate:
                     example: "2024-07-30T05:12:24.597Z"
-                  'reserveStock':
+                  reserveStock:
                     example:
                       id: "AA240816120004"
                       '@type': "ReserveStockRef"
+                  ArrayTest:
+                    example:
+                      - id: "Arr1"
+                        '@type': "ReserveStockRef1"
+                      - id: "Arr2"
+                        '@type': "ReserveStockRef2"
                 required:
                   - "@type"
                   - "@type1"
