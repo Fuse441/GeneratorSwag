@@ -1,87 +1,115 @@
 {
-    "title": "test",
+    "title": "AC-Payment [ETopUp API]",
     "version": "1.0.0",
-    "description": "description1",
+    "description": "Swagger ETopUp API",
     "contact": {
         "name": "T3",
         "url": ".."
     },
     "servers": [
-        "http://api.example.com/v1",
         "http://api.example.com/v1"
     ],
     "paths": {
-        "/api/v1/communicationMessage": {
+        "/api/v1/eTopup": {
             "method": "GET",
             "tags": [],
             "require": {
                 "header": {
-                    "transaction": "asd1234",
-                    "transaction2": "123444"
+                    "Content-Type": "application/json",
+                    "mfaf-session": "cm4845464846546846",
+                    "soapAction": "http://ESAD.ais.co.th/ETWS_PPS_Topup",
+                    "projectCode ": "projAMEX-MYAIS12CTOPUCDMectCode"
                 },
-                "body": {
-                    "test1": 1,
-                    "test2": 1,
-                    "test3": 1
-                }
-            },
-            "request": {
-                "header": {
-                    "testRequest": "testRequest",
-                    "testRequest2": "testRequest"
-                },
-                "body": {
-                     "ArrayTest":[
-                                {
-                                    "id": "Arr1",
-                                    "@type": "ReserveStockRef1"
-                                },
-                                {
-                                    "id": "Arr2",
-                                    "@type": "ReserveStockRef2"
-                                }
-                            ],
-                    "test": 1,
-                    "asd": 2
-                }
-            },
-            "response": {
-                "200": {
-                    "description": "case 200",
-                    "require": {
-                        "header": {
-                            "content-type": "application/json"
-                        },
-                        "body": {
-                            "@type": "CancelStockReservation_FVO",
-                            "@type1": "CancelStockReservation_FVO"
-                        }
-                    },
-                    "nonRquire": {
-                        "header": {},
-                        "body": {
-                            "cancellationReason": "string",
-                            "effectiveCancellationDate": "2024-07-30T05:12:24.597Z",
-                            "requestedCancellationDate": "2024-07-30T05:12:24.597Z",
-                            "reserveStock": {
-                                "id": "AA240816120004",
-                                "@type": "ReserveStockRef"
+                "body": [
+                    {
+                        "key": "characteristic",
+                        "type" : "array",
+                        "requireKey": [
+                            "name"
+                        ],
+                        "example": [
+                            {
+                                "name": "mobileNo",
+                                "value": "937055365"
                             },
-                            "ArrayTest":[
-                                {
-                                    "id": "Arr1",
-                                    "@type": "ReserveStockRef1"
-                                },
-                                {
-                                    "id": "Arr2",
-                                    "@type": "ReserveStockRef2"
-                                }
-                            ]
-
+                            {
+                                "name": "command",
+                                "value": "PPSCHGNB"
+                            },
+                            {
+                                "name": "batchNo",  
+                                "value": "1008555"
+                            },
+                            {
+                                "name": "serialNo",
+                                "value": "851603015"
+                            }
+                        ]
+                    },{
+                        "key": "characteristic1",
+                        "type" : "string",
+                        "example": "test1"
+                    },{
+                         "key": "characteristic2",
+                        "type" : "object",
+                        "example":  {
+                            "name" : "test",
+                            "value" : "test"
                         }
                     }
+                ]
+        }
+    },
+    "request": {
+        "header": {
+            "mfaf-transaction": "testRequest",
+            "mfaf-broker": "testRequest",
+            "mfaf-channel": "none",
+            "mfaf-device": "none",
+            "mfaf-public": "mfaf-public",
+            "mfaf-useCase": "none",
+            "mfaf-useCaseStep": "none",
+            "mfaf-user": "none"
+        },
+        "body": {}
+    },
+    "response": {
+        "200": {
+            "description": "case 200",
+            "require": {
+                "header": {
+                    "content-type": "application/json"
+                },
+                "body": {}
+            },
+            "nonRquire": {
+                "header": {},
+                "body": {
+                    "status": "CTWS000",
+                    "message": "Success"
+                }
+            }
+        },
+        "400": {
+            "description": "case 200",
+            "require": {
+                "header": {
+                    "content-type": "application/json"
+                },
+                "body": {}
+            },
+            "nonRquire": {
+                "header": {},
+                "body": {
+                    "code": "40300",
+                    "status": 403,
+                    "message": "Missing or Invalid paremeter",
+                    "referenceError": "Missing or Invalid paremeter"
                 }
             }
         }
     }
 }
+}
+ 
+ 

@@ -48,7 +48,8 @@ function ReadInit() {
                                 type: "object",
                                 properties: {},
                                 required: []
-                            }
+                            },
+                            example : {}
                         }
                     }
                 },
@@ -72,51 +73,90 @@ function ReadInit() {
         }
 
         // loop require Body ************************************
-        requests.body.paths[key].require.body.forEach((element, index) => {
-            console.log("log require : " + JSON.stringify(index));
-            if (index > requests.body.paths[key].require.body.length) {
-                console.log("case length")
-            } else {
+        requests.body.paths[key].require.body.forEach((element, index,array) => {
+            // console.log("log require : " + JSON.stringify(array));
+            obj.paths[key][method].requestBody.content['application/json'].schema.required.push(element.key)
+
                 switch (element.type) {
                     case "array":
                         const objectArrayRequire = {
                             type: element.type,
                             items: {
-                                type: "object"
+                                type: "object",
+                                properties : {},
+                                required: []
                             },
-                            example: [],
-                            required: []
                         };
                         setArrayObjectRequire(objectArrayRequire, element);
                         break;
 
                     case "string":
+
                         const objectStringRequire = {
                             type: element.type,
-                            example: element.example
                         };
                         setStringObjectRequire(objectStringRequire, element);
                         break;
+                    case "object":
 
+                        const objectRequire = {
+                            type: element.type,
+                            properties : {}
+                        };
+                        setObjectRequire(objectRequire, element);
+                        break;
                     default:
                         break;
                 }
-            }
+
+                if (index === array.length - 1) {
+                    
+                   
+                }
+            
         });
 
         function setArrayObjectRequire(objectArrayRequire, element) {
-            for (const item of element.example) {
-                objectArrayRequire.example.push(item);
+           
+            
+            objectArrayRequire.items.required = [...element.requireKey];
+
+            for (const key in element.example[0]) {
+              
+                objectArrayRequire.items.properties[key] = { type: "string" };
             }
 
-            for (const key of element.requireKey) {
-                objectArrayRequire.required.push(key);
+           
+            
+      
+            objectArrayRequire.example = element.example.map(exampleItem => ({
+                ...exampleItem
+            }));
+
+            const withOutExample = {
+                type : objectArrayRequire.type,
+                items : objectArrayRequire.items
+                
             }
-            obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = objectArrayRequire;
+            obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = withOutExample
+            
+            obj.paths[key][method].requestBody.content['application/json'].example[element.key] = objectArrayRequire.example
+        
         }
-
+        
         function setStringObjectRequire(objectStringRequire, element) {
             obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = objectStringRequire;
+            obj.paths[key][method].requestBody.content['application/json'].example[element.key] = element.example
+
+        }
+        function setObjectRequire(objectRequire, element) {
+            for (const key in objectRequire.example) {
+                console.log(key)
+                objectRequire.properties[key] = { type: "string" };
+            }
+            obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = objectRequire;
+            obj.paths[key][method].requestBody.content['application/json'].example[element.key] = element.example
+
         }
 
 

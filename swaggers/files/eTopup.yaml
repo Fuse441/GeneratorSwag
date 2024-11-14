@@ -21,22 +21,36 @@ paths:
                   type: "array"
                   items:
                     type: "object"
-                  example:
-                    - name: "mobileNo"
-                      value: "937055365"
-                    - name: "command"
-                      value: "PPSCHGNB"
-                    - name: "batchNo"
-                      value: "1008555"
-                    - name: "serialNo"
-                      value: "851603015"
-                  required:
-                    - "name"
-                    - "value"
+                    properties:
+                      name:
+                        type: "string"
+                      value:
+                        type: "string"
+                    required:
+                      - "name"
                 characteristic1:
                   type: "string"
-                  example: "test"
-              required: []
+                characteristic2:
+                  type: "object"
+                  properties: {}
+              required:
+                - "characteristic"
+                - "characteristic1"
+                - "characteristic2"
+            example:
+              characteristic:
+                - name: "mobileNo"
+                  value: "937055365"
+                - name: "command"
+                  value: "PPSCHGNB"
+                - name: "batchNo"
+                  value: "1008555"
+                - name: "serialNo"
+                  value: "851603015"
+              characteristic1: "test1"
+              characteristic2:
+                name: "test"
+                value: "test"
       parameters:
         - in: "header"
           name: "Content-Type"
