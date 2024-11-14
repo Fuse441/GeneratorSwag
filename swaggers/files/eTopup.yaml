@@ -1,0 +1,67 @@
+openapi: "3.0.0"
+info:
+  title: "AC-Payment [ETopUp API]"
+  version: "1.0.0"
+  description: "Swagger ETopUp API"
+  contact:
+    name: "T3"
+    url: ".."
+servers:
+  - url: "http://api.example.com/v1"
+paths:
+  /api/v1/eTopup:
+    get:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                characteristic:
+                  type: "array"
+                  items:
+                    type: "object"
+                  example:
+                    - name: "mobileNo"
+                      value: "937055365"
+                    - name: "command"
+                      value: "PPSCHGNB"
+                    - name: "batchNo"
+                      value: "1008555"
+                    - name: "serialNo"
+                      value: "851603015"
+                  required:
+                    - "name"
+                    - "value"
+                characteristic1:
+                  type: "string"
+                  example: "test"
+              required: []
+      parameters:
+        - in: "header"
+          name: "Content-Type"
+          schema:
+            type: "string"
+          required: true
+          description: "Content-Type"
+        - in: "header"
+          name: "mfaf-session"
+          schema:
+            type: "string"
+          required: true
+          description: "mfaf-session"
+        - in: "header"
+          name: "soapAction"
+          schema:
+            type: "string"
+          required: true
+          description: "soapAction"
+        - in: "header"
+          name: "projectCode "
+          schema:
+            type: "string"
+          required: true
+          description: "projectCode "
+      responses: {}
+security:
+  - apiKey: []

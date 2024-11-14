@@ -1,0 +1,159 @@
+openapi: "3.0.0"
+info:
+  title: "AC-Payment [ETopUp API]"
+  version: "1.0.0"
+  description: "Swagger ETopUp API"
+  contact:
+    name: "T3"
+    url: ".."
+servers:
+- url: "http://api.example.com/v1"
+paths:
+  /api/v1/eTopup:
+    get:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required:
+              - name
+              - value
+              properties:
+                totalAmount:
+                  type: "array"
+                  items:
+                    type: "object"
+                  example:
+                  - name: "10"
+                    value: "10"
+                  required:
+                  - value
+                channel:
+                  type: "string"
+                  example:
+                    id: "1"
+                statusDate:
+                  type: "string"
+                  example: "023-10-31T00:00:00.000Z"
+              # required:
+              # - "characteristic"
+              # - "totalAmount"
+              # - "channel"
+              # - "statusDate"
+      parameters:
+      - in: "header"
+        name: "Content-Type"
+        schema:
+          type: "string"
+        required: true
+        description: "Content-Type"
+      - in: "header"
+        name: "mfaf-session"
+        schema:
+          type: "string"
+        required: true
+        description: "mfaf-session"
+      - in: "header"
+        name: "soapAction"
+        schema:
+          type: "string"
+        required: true
+        description: "soapAction"
+      - in: "header"
+        name: "projectCode "
+        schema:
+          type: "string"
+        required: true
+        description: "projectCode "
+      - in: "header"
+        name: "mfaf-transaction"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-transaction"
+      - in: "header"
+        name: "mfaf-broker"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-broker"
+      - in: "header"
+        name: "mfaf-channel"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-channel"
+      - in: "header"
+        name: "mfaf-device"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-device"
+      - in: "header"
+        name: "mfaf-public"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-public"
+      - in: "header"
+        name: "mfaf-useCase"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-useCase"
+      - in: "header"
+        name: "mfaf-useCaseStep"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-useCaseStep"
+      - in: "header"
+        name: "mfaf-user"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-user"
+      responses:
+        200:
+          description: "case 200"
+          headers:
+            content-type:
+              description: "content-type"
+              required: true
+              schema:
+                type: "string"
+                example: "application/json"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    example: "CTWS000"
+                  message:
+                    example: "Success"
+        400:
+          description: "case 200"
+          headers:
+            content-type:
+              description: "content-type"
+              required: true
+              schema:
+                type: "string"
+                example: "application/json"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    example: "40300"
+                  status:
+                    example: 403
+                  message:
+                    example: "Missing or Invalid paremeter"
+                  referenceError:
+                    example: "Missing or Invalid paremeter"
+security:
+- apiKey: []
