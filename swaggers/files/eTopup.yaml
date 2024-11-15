@@ -160,11 +160,14 @@ paths:
                 type: "object"
                 properties:
                   status:
-                    example: "CTWS000"
+                    type: "string"
                   message:
-                    example: "Success"
+                    type: "string"
+              example:
+                status: "CTWS000"
+                message: "Success"
         400:
-          description: "case 200"
+          description: "case 400"
           headers:
             content-type:
               description: "content-type"
@@ -178,12 +181,17 @@ paths:
                 type: "object"
                 properties:
                   code:
-                    example: "40300"
+                    type: "string"
                   status:
-                    example: 403
+                    type: "number"
                   message:
-                    example: "Missing or Invalid paremeter"
+                    type: "string"
                   referenceError:
-                    example: "Missing or Invalid paremeter"
+                    type: "string"
+              example:
+                code: "40300"
+                status: 403
+                message: "Missing or Invalid paremeter"
+                referenceError: "Missing or Invalid paremeter"
 security:
   - apiKey: []

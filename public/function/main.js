@@ -283,7 +283,8 @@ function ReadInit() {
     
                                 },
                                 required: []
-                            }
+                            },
+                            example : {}
                         }
                     }
                 };
@@ -315,10 +316,10 @@ function ReadInit() {
                     const value = res.require.body[key];
     
                     const objectBody = {
-                        example: value
+                        type: typeof value
                     };
     
-                    responseData.content['application/json'].schema.required.push(key)
+                     responseData.content['application/json'].schema.required.push(key)
                     responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
                 }
             }else{
@@ -333,7 +334,7 @@ function ReadInit() {
                         required: true,
                         schema: {
                             type: typeof value,
-                            example: value
+                          
                         }
     
                     }
@@ -342,7 +343,6 @@ function ReadInit() {
     
                 for (const key in res.nonRquire.body) {
                     const value = res.nonRquire.body[key];
-                    // console.log("check value : " + JSON.stringify(value) + " = " + JSON.stringify(typeof value));
     
                     let objectBody;
     
@@ -353,21 +353,23 @@ function ReadInit() {
                         };
                     } else if (typeof value === "object" && value !== null) {
                         objectBody = {
-                            example: checkAndAct(value)
+                            type: typeof checkAndAct(value)
                         };
                     } else if (typeof value === "string") {
                         objectBody = {
-                            example: checkAndAct(value)
+                            type: typeof checkAndAct(value)
                         };
                     } else {
                         objectBody = {
-                            example: value
+                            type: typeof value
                         };
                     }
-    
+                    // console.log("object Body : ",objectBody)
+
+                    responseData.content['application/json'].example[key] = value;
                     responseData.content['application/json'].schema.properties[key] = objectBody;
                 }
-    
+                
                 try {
                     obj.paths[key][method].responses[item] = responseData;
                 } catch (error) {
