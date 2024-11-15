@@ -61,7 +61,6 @@ function ReadInit() {
 
             }
         };
-        console.log(requests.body.paths[key].tags)
         obj.paths[key][method].tags = (requests.body.paths[key].tags)
 
         for (const item in requests.body.paths[key].require.header) {
@@ -378,7 +377,7 @@ function ReadInit() {
             try {
                 obj.paths[key][method].responses[item] = responseData;
             } catch (error) {
-                //console.log("catch : ", error);
+                console.log("catch : ", error);
             }
 
 
@@ -412,10 +411,24 @@ function ReadInit() {
            
         }
 
-        }
-        for (const key in appError) {
-            // objectAppError.content['application/json'].schema.pr(appError[key].httpStatus)
+        for (const keyStatus in appError) {
+            for (const itemOnObject in appError[keyStatus]) {
+                objectAppError.content["application/json"].schema.properties[itemOnObject] = { type: "string"}
+                objectAppError.content["application/json"].example[itemOnObject] = appError[keyStatus][itemOnObject];
+
             }
+            
+
+            try {
+                obj.paths[key][method].responses[keyStatus] = objectAppError;
+                console.log("in case")
+
+            } catch (error) {
+                // console.log("catch : ", error);
+            }
+            }
+        }
+     
         // obj.paths[key][method].responses[item] = appError;
 
         const yamlData = YAML.stringify(obj);
