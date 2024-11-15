@@ -1,7 +1,37 @@
 {
-    "500": {
-        "httpStatus": 500,
-        "resultCode": "50003",
-        "developerMessage": "Connection Error"
-    }
+    "500": [
+        {
+            "httpStatus": 500,
+            "resultCode": "50003",
+            "developerMessage": "Connection Error"
+        },
+        {
+            "httpStatus": 500,
+            "resultCode": "50002",
+            "developerMessage": "Connection timeout"
+        },
+        {
+            "httpStatus": 500,
+            "resultCode": "50000",
+            "developerMessage": "System error"
+        }
+    ],
+    "400": [
+        {
+            "httpStatus": 403,
+            "resultCode": "40300",
+            "developerMessage": "Missing or invalid parameter"
+        },
+        {
+            "httpStatus": 417,
+            "resultCode": "41700",
+            "developerMessage": "Expectation Failed"
+        },
+        {
+            "httpStatus": 404,
+            "resultCode": "40400",
+            "developerMessage": "Unknown URL"
+        }
+    ]
+
 }
