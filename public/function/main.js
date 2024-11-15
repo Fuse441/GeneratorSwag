@@ -37,10 +37,13 @@ function ReadInit() {
     obj.paths = {};
     for (const key in requests.body.paths) {
         fileName = key
-        // console.log("log path : " + JSON.stringify(requests.body.paths[key]))
         const method = requests.body.paths[key].method.toLowerCase().replace(/['"]+/g, '');
+
+
+
         obj.paths[key] = {
             [method]: {
+                tags: [],
                 requestBody: {
                     content: {
                         "application/json": {
@@ -49,7 +52,7 @@ function ReadInit() {
                                 properties: {},
                                 required: []
                             },
-                            example : {}
+                            example: {}
                         }
                     }
                 },
@@ -58,6 +61,8 @@ function ReadInit() {
 
             }
         };
+        console.log(requests.body.paths[key].tags)
+        obj.paths[key][method].tags = (requests.body.paths[key].tags)
 
         for (const item in requests.body.paths[key].require.header) {
             const objectParamerter = {
@@ -73,87 +78,87 @@ function ReadInit() {
         }
 
         // loop require Body ************************************
-        requests.body.paths[key].require.body.forEach((element, index,array) => {
-             console.log("log require : " + JSON.stringify(index));
+        requests.body.paths[key].require.body.forEach((element, index, array) => {
+            //console.log("log require : " + JSON.stringify(index));
             obj.paths[key][method].requestBody.content['application/json'].schema.required.push(element.key)
 
-                switch (element.type) {
-                    case "array":
-                        const objectArrayRequire = {
-                            type: element.type,
-                            items: {
-                                type: "object",
-                                properties : {},
-                                required: []
-                            },
-                        };
-                        setArrayObjectRequire(objectArrayRequire, element);
-                        break;
+            switch (element.type) {
+                case "array":
+                    const objectArrayRequire = {
+                        type: element.type,
+                        items: {
+                            type: "object",
+                            properties: {},
+                            required: []
+                        },
+                    };
+                    setArrayObjectRequire(objectArrayRequire, element);
+                    break;
 
-                    case "string":
+                case "string":
 
-                        const objectStringRequire = {
-                            type: element.type,
-                        };
-                        setStringObjectRequire(objectStringRequire, element);
-                        break;
-                    case "object":
+                    const objectStringRequire = {
+                        type: element.type,
+                    };
+                    setStringObjectRequire(objectStringRequire, element);
+                    break;
+                case "object":
 
-                        const objectRequire = {
-                            type: element.type,
-                            properties : {}
-                        };
-                        setObjectRequire(objectRequire, element);
-                        break;
-                    default:
-                        break;
-                }
+                    const objectRequire = {
+                        type: element.type,
+                        properties: {}
+                    };
+                    setObjectRequire(objectRequire, element);
+                    break;
+                default:
+                    break;
+            }
 
-                if (index === array.length - 1) {
-                    
-                   
-                }
-            
+            if (index === array.length - 1) {
+
+
+            }
+
         });
 
         function setArrayObjectRequire(objectArrayRequire, element) {
-           
-            
+
+
             objectArrayRequire.items.required = [...element.requireKey];
 
             for (const key in element.example[0]) {
-              
+
                 objectArrayRequire.items.properties[key] = { type: "string" };
             }
 
-           
-            
-      
+
+
+
             objectArrayRequire.example = element.example.map(exampleItem => ({
                 ...exampleItem
             }));
 
             const withOutExample = {
-                type : objectArrayRequire.type,
-                items : objectArrayRequire.items
-                
+                type: objectArrayRequire.type,
+                items: objectArrayRequire.items
+
             }
             obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = withOutExample
-            
+
             obj.paths[key][method].requestBody.content['application/json'].example[element.key] = objectArrayRequire.example
-        
+
         }
-        
+
         function setStringObjectRequire(objectStringRequire, element) {
             obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = objectStringRequire;
             obj.paths[key][method].requestBody.content['application/json'].example[element.key] = element.example
 
         }
         function setObjectRequire(objectRequire, element) {
-             
+
             objectRequire.required = [...element.requireKey];
             for (const key in element.example) {
-                console.log(key)
+                //console.log(key)
                 objectRequire.properties[key] = { type: typeof element.example[key] };
             }
             obj.paths[key][method].requestBody.content['application/json'].schema.properties[element.key] = objectRequire;
@@ -192,67 +197,67 @@ function ReadInit() {
         }
 
 
-            for (const item in requests.body.paths[key].request.body) {
-                const value = requests.body.paths[key].request.body[item];
-                console.log("log item : ",item)
-                let objectResponseBody = {};
+        for (const item in requests.body.paths[key].request.body) {
+            const value = requests.body.paths[key].request.body[item];
+            //console.log("log item : ",item)
+            let objectResponseBody = {};
 
-                if (Array.isArray(value)) {
-                    objectResponseBody = {
-                        type: "array",
-                        example: []
-                    };
+            if (Array.isArray(value)) {
+                objectResponseBody = {
+                    type: "array",
+                    example: []
+                };
 
-                    for (const element of value) {
-                        let formattedElement = {};
+                for (const element of value) {
+                    let formattedElement = {};
 
-                        for (const key in element) {
-                            const formattedKey = key.includes("@") ? `'${key}'` : key;
-                            formattedElement[formattedKey] = element[key];
-                        }
-
-                         objectResponseBody.example.push(formattedElement);
+                    for (const key in element) {
+                        const formattedKey = key.includes("@") ? `'${key}'` : key;
+                        formattedElement[formattedKey] = element[key];
                     }
-                    obj.paths[key][method].requestBody.content['application/json'].example[item] = objectResponseBody.example;
 
+                    objectResponseBody.example.push(formattedElement);
                 }
-                else if (typeof value === "object" && value !== null) {
-                    
-                
+                obj.paths[key][method].requestBody.content['application/json'].example[item] = objectResponseBody.example;
 
-                    objectResponseBody = {
-                        type: "object",
-                        properties: {}
+            }
+            else if (typeof value === "object" && value !== null) {
+
+
+
+                objectResponseBody = {
+                    type: "object",
+                    properties: {}
+                };
+
+                for (const subKey in value) {
+
+                    const formattedSubKey = subKey.includes("@") ? `'${subKey}'` : subKey;
+                    //console.log("format key : ",formattedSubKey )
+                    objectResponseBody.properties[item] = {
+                        type: typeof value[subKey],
+
                     };
 
-                    for (const subKey in value) {
-                       
-                        const formattedSubKey = subKey.includes("@") ? `'${subKey}'` : subKey;
-                        console.log("format key : ",formattedSubKey )
-                        objectResponseBody.properties[item] = {
-                            type: typeof value[subKey],
-                            
-                        };
-                      
-                    }
-                    obj.paths[key][method].requestBody.content['application/json'].example[item] = value;
-                    console.log("log value",obj.paths[key][method].requestBody.content['application/json'].example)
+                }
+                obj.paths[key][method].requestBody.content['application/json'].example[item] = value;
+                //console.log("log value",obj.paths[key][method].requestBody.content['application/json'].example)
 
-                }
-                else {
-                    objectResponseBody = {
-                        type: typeof value,
-                        example: value
-                    };
-                    obj.paths[key][method].requestBody.content['application/json'].example[item] = value;
-                }
-                const withOutExample = {
-                    type: typeof value
-                }
-              
-                obj.paths[key][method].requestBody.content['application/json'].schema.properties[item] = withOutExample;
-                // obj.paths[key][method].requestBody.content['application/json'].example[item] = objectResponseBody.example;
-                // console.log("log value 2",obj.paths[key][method].requestBody.content['application/json'].example)
+            }
+            else {
+                objectResponseBody = {
+                    type: typeof value,
+                    example: value
+                };
+                obj.paths[key][method].requestBody.content['application/json'].example[item] = value;
+            }
+            const withOutExample = {
+                type: typeof value
+            }
+
+            obj.paths[key][method].requestBody.content['application/json'].schema.properties[item] = withOutExample;
+            // obj.paths[key][method].requestBody.content['application/json'].example[item] = objectResponseBody.example;
+            // //console.log("log value 2",obj.paths[key][method].requestBody.content['application/json'].example)
 
             // }
 
@@ -260,125 +265,158 @@ function ReadInit() {
 
 
 
-            // console.log("log res : " +  JSON.stringify(Object.keys(requests.body.paths[key].response).length))
+            // //console.log("log res : " +  JSON.stringify(Object.keys(requests.body.paths[key].response).length))
 
-        
+
 
         };
         for (const item in requests.body.paths[key].response) {
-            console.log("in case response")
-                
-                const responseData = {
-    
-                    description: requests.body.paths[key].response[item].description,
-                    headers: {
-    
-                    },
-    
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "object",
-                                properties: {
-    
-                                },
-                                required: []
+            //console.log("in case response")
+
+            const responseData = {
+
+                description: requests.body.paths[key].response[item].description,
+                headers: {
+
+                },
+
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            properties: {
+
                             },
-                            example : {}
-                        }
-                    }
-                };
-    
-    
-    
-                const res = requests.body.paths[key].response[item]
-                if (Object.keys(res.require.header).length != 0) {
-                    for (const key in res.require.header) {
-    
-                        const value = res.require.header[key];
-                        const objectHeader = {
-                            description: key,
-                            required: true,
-                            schema: {
-                                type: typeof value,
-                                example: value
-                            }
-    
-                        }
-                        responseData.headers[key] = objectHeader
+                            required: []
+                        },
+                        example: {}
                     }
                 }
-                else {
-                    // responseData.content['application/json'].schema.header[`'${key.toString()}'`] = objectBody
-                }
-                if(Object.keys(res.require.body).length != 0){
-                for (const key in res.require.body) {
-                    const value = res.require.body[key];
-    
-                    const objectBody = {
-                        type: typeof value
-                    };
-    
-                     responseData.content['application/json'].schema.required.push(key)
-                    responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
-                }
-            }else{
-               delete responseData.content['application/json'].schema.required  
-          
-            }
-    
-                for (const key in res.nonRquire.header) {
-                    const value = res.nonRquire.header[key];
+            };
+
+
+
+            const res = requests.body.paths[key].response[item]
+            if (Object.keys(res.require.header).length != 0) {
+                for (const key in res.require.header) {
+
+                    const value = res.require.header[key];
                     const objectHeader = {
                         description: key,
                         required: true,
                         schema: {
                             type: typeof value,
-                          
+                            example: value
                         }
-    
+
                     }
                     responseData.headers[key] = objectHeader
                 }
-    
-                for (const key in res.nonRquire.body) {
-                    const value = res.nonRquire.body[key];
-    
-                    let objectBody;
-    
-                    if (Array.isArray(value)) {
-    
-                        objectBody = {
-                            example: value.map(item => checkAndAct(item))
-                        };
-                    } else if (typeof value === "object" && value !== null) {
-                        objectBody = {
-                            type: typeof checkAndAct(value)
-                        };
-                    } else if (typeof value === "string") {
-                        objectBody = {
-                            type: typeof checkAndAct(value)
-                        };
-                    } else {
-                        objectBody = {
-                            type: typeof value
-                        };
-                    }
-                    // console.log("object Body : ",objectBody)
+            }
+            else {
+                // responseData.content['application/json'].schema.header[`'${key.toString()}'`] = objectBody
+            }
+            if (Object.keys(res.require.body).length != 0) {
+                for (const key in res.require.body) {
+                    const value = res.require.body[key];
 
-                    responseData.content['application/json'].example[key] = value;
-                    responseData.content['application/json'].schema.properties[key] = objectBody;
+                    const objectBody = {
+                        type: typeof value
+                    };
+
+                    responseData.content['application/json'].schema.required.push(key)
+                    responseData.content['application/json'].schema.properties[`'${key.toString()}'`] = objectBody
                 }
-                
-                try {
-                    obj.paths[key][method].responses[item] = responseData;
-                } catch (error) {
-                    console.log("catch : ", error);
-                }
-    
-    
+            } else {
+                delete responseData.content['application/json'].schema.required
+
             }
 
+            for (const key in res.nonRquire.header) {
+                const value = res.nonRquire.header[key];
+                const objectHeader = {
+                    description: key,
+                    required: true,
+                    schema: {
+                        type: typeof value,
+
+                    }
+
+                }
+                responseData.headers[key] = objectHeader
+            }
+
+            for (const key in res.nonRquire.body) {
+                const value = res.nonRquire.body[key];
+
+                let objectBody;
+
+                if (Array.isArray(value)) {
+
+                    objectBody = {
+                        example: value.map(item => checkAndAct(item))
+                    };
+                } else if (typeof value === "object" && value !== null) {
+                    objectBody = {
+                        type: typeof checkAndAct(value)
+                    };
+                } else if (typeof value === "string") {
+                    objectBody = {
+                        type: typeof checkAndAct(value)
+                    };
+                } else {
+                    objectBody = {
+                        type: typeof value
+                    };
+                }
+                // //console.log("object Body : ",objectBody)
+
+                responseData.content['application/json'].example[key] = value;
+                responseData.content['application/json'].schema.properties[key] = objectBody;
+            }
+
+            try {
+                obj.paths[key][method].responses[item] = responseData;
+            } catch (error) {
+                //console.log("catch : ", error);
+            }
+
+
+        }
+        const objectAppError = {
+            description : "",
+            headers: {
+                "content-type": {
+                    description: "content-type",
+                    required: true,
+                    schema: {
+                        type: "string",
+                        example: ""
+
+                    }
+                }
+            },
+            content : {
+                "application/json" : {
+                    schema: {
+                        type: "object",
+                        properties: {}
+                    },
+                    example: {
+
+                    }
+                  
+                }
+                
+            } 
+           
+        }
+
+        }
+        for (const key in appError) {
+            // objectAppError.content['application/json'].schema.pr(appError[key].httpStatus)
+            }
+        // obj.paths[key][method].responses[item] = appError;
 
         const yamlData = YAML.stringify(obj);
         return { yamlData, fileName };
@@ -386,12 +424,12 @@ function ReadInit() {
     }
 
     function checkAndAct(text) {
-        // console.log(typeof text);
+        // //console.log(typeof text);
         if (typeof text === 'object' && text !== null) {
             const object = {};
             for (const key in text) {
                 if (key.includes('@')) {
-                    // console.log("log for : " + key)
+                    // //console.log("log for : " + key)
                     object[key] = `${text[key]}`;
                     delete object[key]
                     const keyTemp = `'${key}'`
@@ -408,17 +446,17 @@ function ReadInit() {
                     object[key] = text[key];
                 }
             }
-            // console.log("log object: " + JSON.stringify(object));
+            // //console.log("log object: " + JSON.stringify(object));
             return object;
         }
         return text;
     }
-}
+
 
 
 
 function CreateFileYAML(content, fileName) {
-    // console.log("Content to write:", content); 
+    // //console.log("Content to write:", content); 
     try {
         if (!content) {
             console.error("No content provided to CreateFileYAML");
@@ -428,7 +466,7 @@ function CreateFileYAML(content, fileName) {
         const afterV1 = fileName.split('/v1/')[1];
 
         fs.writeFileSync(`swaggers/files/${afterV1}.yaml`, content);
-        // console.log("YAML file created successfully");
+        // //console.log("YAML file created successfully");
     } catch (err) {
         console.error("Error writing file:", err);
         throw err;
