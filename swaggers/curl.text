@@ -12,7 +12,9 @@
     "paths": {
         "/api/v1/eTopup": {
             "method": "GET",
-            "tags": [],
+            "tags": [
+                "1234"
+            ],
             "require": {
                 "header": {
                     "Content-Type": "application/json",
@@ -23,9 +25,10 @@
                 "body": [
                     {
                         "key": "characteristic",
-                        "type" : "array",
+                        "type": "array",
                         "requireKey": [
                             "name"
+                            
                         ],
                         "example": [
                             {
@@ -37,7 +40,7 @@
                                 "value": "PPSCHGNB"
                             },
                             {
-                                "name": "batchNo",  
+                                "name": "batchNo",
                                 "value": "1008555"
                             },
                             {
@@ -45,71 +48,89 @@
                                 "value": "851603015"
                             }
                         ]
-                    },{
+                    },
+                    {
                         "key": "characteristic1",
-                        "type" : "string",
+                        "type": "string",
                         "example": "test1"
-                    },{
-                         "key": "characteristic2",
-                        "type" : "object",
-                        "example":  {
-                            "name" : "test",
-                            "value" : "test"
+                    },
+                    {
+                        "key": "characteristic2",
+                        "type": "object",
+                        "requireKey" : [
+                            "name",
+                            "value"
+                        ],
+                        "example": {
+                            "name": 123,
+                            "value": "test"
                         }
                     }
                 ]
-        }
-    },
-    "request": {
-        "header": {
-            "mfaf-transaction": "testRequest",
-            "mfaf-broker": "testRequest",
-            "mfaf-channel": "none",
-            "mfaf-device": "none",
-            "mfaf-public": "mfaf-public",
-            "mfaf-useCase": "none",
-            "mfaf-useCaseStep": "none",
-            "mfaf-user": "none"
-        },
-        "body": {}
-    },
-    "response": {
-        "200": {
-            "description": "case 200",
-            "require": {
-                "header": {
-                    "content-type": "application/json"
-                },
-                "body": {}
             },
-            "nonRquire": {
-                "header": {},
+            "request": {
+                "header": {
+                    "mfaf-transaction": "testRequest",
+                    "mfaf-broker": "testRequest",
+                    "mfaf-channel": "none",
+                    "mfaf-device": "none",
+                    "mfaf-public": "mfaf-public",
+                    "mfaf-useCase": "none",
+                    "mfaf-useCaseStep": "none",
+                    "mfaf-user": "none"
+                },
                 "body": {
-                    "status": "CTWS000",
-                    "message": "Success"
+                    "test" : 1,
+                    "test2" : {
+                        "name" : "name_test2",
+                        "value" : "test2"   
+                    },
+                    "test3" : [
+                        {
+                            "name" : "name_test3",
+                            "value" : "test3"
+                        }
+                    ]
+                    
+                }
+            },
+        "response": {
+            "200": {
+                "description": "case 200",
+                "require": {
+                    "header": {
+                        "content-type": "application/json"
+                    },
+                    "body": {}
+                },
+                "nonRquire": {
+                    "header": {},
+                    "body": {
+                        "status": "CTWS000",
+                        "message": "Success"
+                    }
+                }
+            },
+            "400": {
+                "description": "case 200",
+                "require": {
+                    "header": {
+                        "content-type": "application/json"
+                    },
+                    "body": {}
+                },
+                "nonRquire": {
+                    "header": {},
+                    "body": {
+                        "code": "40300",
+                        "status": 403,
+                        "message": "Missing or Invalid paremeter",
+                        "referenceError": "Missing or Invalid paremeter"
+                    }
                 }
             }
-        },
-        "400": {
-            "description": "case 200",
-            "require": {
-                "header": {
-                    "content-type": "application/json"
-                },
-                "body": {}
-            },
-            "nonRquire": {
-                "header": {},
-                "body": {
-                    "code": "40300",
-                    "status": 403,
-                    "message": "Missing or Invalid paremeter",
-                    "referenceError": "Missing or Invalid paremeter"
-                }
-            }
         }
+        }
+        
     }
 }
-}
- 
- 
