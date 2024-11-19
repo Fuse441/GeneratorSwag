@@ -11,96 +11,40 @@ servers:
 paths:
   /api/v1/eTopup:
     get:
+      tags:
+        - "1234"
       requestBody:
         content:
           application/json:
             schema:
               type: "object"
               properties:
-                characteristic:
+                test3:
                   type: "array"
                   items:
                     type: "object"
                     properties:
-                      name:
-                        type: "string"
+                      test1:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            test12:
+                              type: "string"
                       value:
                         type: "string"
-                    required:
-                      - "name"
-                characteristic1:
-                  type: "string"
-                characteristic2:
-                  type: "object"
-                  properties:
-                    name:
-                      type: "number"
-                    value:
-                      type: "string"
-                  required:
-                    - "name"
-                    - "value"
-                test:
-                  type: "number"
-                test2:
-                  type: "object"
-                test3:
-                  type: "object"
-              required:
-                - "characteristic"
-                - "characteristic1"
-                - "characteristic2"
-            example:
-              characteristic:
-                - name: "mobileNo"
-                  value: "937055365"
-                - name: "command"
-                  value: "PPSCHGNB"
-                - name: "batchNo"
-                  value: "1008555"
-                - name: "serialNo"
-                  value: "851603015"
-              characteristic1: "test1"
-              characteristic2:
-                name: 123
-                value: "test"
-              test: 1
-              test2:
-                name: "name_test2"
-                value: "test2"
-              test3:
-                - name: "name_test3"
-                  value: "test3"
+            example: {
+               test3:
+                test1:
+                 - test1
+
+            }
       parameters:
-        - in: "header"
-          name: "Content-Type"
-          schema:
-            type: "string"
-          required: true
-          description: "Content-Type"
-        - in: "header"
-          name: "mfaf-session"
-          schema:
-            type: "string"
-          required: true
-          description: "mfaf-session"
-        - in: "header"
-          name: "soapAction"
-          schema:
-            type: "string"
-          required: true
-          description: "soapAction"
-        - in: "header"
-          name: "projectCode "
-          schema:
-            type: "string"
-          required: true
-          description: "projectCode "
         - in: "header"
           name: "mfaf-transaction"
           schema:
             type: "string"
-          required: false
+          required: true
           description: "mfaf-transaction"
         - in: "header"
           name: "mfaf-broker"
