@@ -13,13 +13,47 @@ module.exports.cutStarFormString = function (key) {
     else return key
 }
 
+module.exports.cutStarFormObject = function (object) {
+    if (Array.isArray(object)) {
+       for (const element of object) {
+        return element
+        // if (element.includes('*', 0)) {
+        //     object = this.nestObject(object);
+            
+        //     return key.replace(/\*/g, "")
+        // }
+
+       }
+    } 
+       else{
+
+       }
+    }
+
+    // } else if (typeof object === "object" && object !== null) {
+    //     structured = {
+    //         type: "object",
+    //         properties: {},
+    //     };
+    //     for (const key in object) {
+    //         structured.properties[this.cutStarFormString(key)] = this.nestObject(object[key]);
+    //     }
+    //     return structured;
+
+    // } else {
+    //     return { 
+    //         type: typeof object 
+    //     };
+    // }
+
+
+
 module.exports.nestObject = function (object, structured = {}) {
     if (Array.isArray(object)) {
         structured = {
             type: "array",
             items: {},
         };
-
         if (object.length > 0) {
             structured.items = this.nestObject(object[0]);
         }
@@ -31,11 +65,8 @@ module.exports.nestObject = function (object, structured = {}) {
             properties: {},
         };
         for (const key in object) {
-            structured.properties[key] = this.nestObject(object[key]);
+            structured.properties[this.cutStarFormString(key)] = this.nestObject(object[key]);
         }
-
-
-
         return structured;
 
     } else {
@@ -44,3 +75,5 @@ module.exports.nestObject = function (object, structured = {}) {
         };
     }
 };
+
+

@@ -18,27 +18,10 @@ paths:
           application/json:
             schema:
               type: "object"
-              properties:
-                test3:
-                  type: "array"
-                  items:
-                    type: "object"
-                    properties:
-                      test1:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            test12:
-                              type: "string"
-                      value:
-                        type: "string"
-            example: {
-               test3:
-                test1:
-                 - test1
-
-            }
+              properties: {}
+              required:
+                - "test3"
+            example: {}
       parameters:
         - in: "header"
           name: "mfaf-transaction"
@@ -104,38 +87,20 @@ paths:
                 type: "object"
                 properties:
                   status:
-                    type: "string"
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        name:
+                          type: "string"
                   message:
                     type: "string"
+                required:
+                  - "status"
+                  - "message"
               example:
-                status: "CTWS000"
+                status:
+                  - *name: "statusTest"
                 message: "Success"
-        400:
-          description: "case 400"
-          headers:
-            content-type:
-              description: "content-type"
-              required: true
-              schema:
-                type: "string"
-                example: "application/json"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  code:
-                    type: "string"
-                  status:
-                    type: "number"
-                  message:
-                    type: "string"
-                  referenceError:
-                    type: "string"
-              example:
-                code: "40300"
-                status: 403
-                message: "Missing or Invalid paremeter"
-                referenceError: "Missing or Invalid paremeter"
 security:
   - apiKey: []
