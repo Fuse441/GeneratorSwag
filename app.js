@@ -42,30 +42,23 @@ function flattenObject(obj, prefix = '') {
     return flattened;
 }
 
-app.post('/excel', (req, res) => {
-    try {
-        const dataToWrite = Array.isArray(req.body)
-            ? req.body.map((item) => flattenObject(item))
-            : [flattenObject(req.body)];
-
-        const sheetData = XLSX.utils.json_to_sheet(dataToWrite);
-        const WorkBook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(WorkBook, sheetData, "Sheet1");
-
-        const outputPath = path.join(__dirname, 'output.xlsx');
-        XLSX.writeFile(WorkBook, outputPath);
-
-        res.json({
-            message: "File uploaded and processed successfully.",
-            filePath: outputPath,
-        });
-    } catch (error) {
-        console.error('Error processing Excel:', error);
-        res.status(500).json({
-            message: 'An error occurred while processing the Excel file.',
-            error: error.message,
-        });
+app.post('/excel', upload.single('file'), (req, res) => {
+    // ตรวจสอบว่าไฟล์มีอยู่หรือไม่
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
     }
+
+    // อ่านไฟล์ Excel
+    const filePath = req.file.path;
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[2]; // เลือกชีตแรก
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // ส่งข้อมูลที่ได้กลับไป
+    res.json({
+        message: "File uploaded and processed successfully.",
+        data: sheetData
+    });
 });
   
   

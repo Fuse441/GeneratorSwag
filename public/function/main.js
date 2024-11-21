@@ -88,18 +88,16 @@ function ReadInit() {
 
             if(Func.checkRequest(item))
                 obj.paths[key][method].requestBody.content['application/json'].schema.required.push(newItem)
-            else
+            
                 obj.paths[key][method].requestBody.content['application/json'].schema.properties[newItem] = Func.nestObject(value);
-
+                obj.paths[key][method].requestBody.content['application/json'].example[newItem] = Func.cutStarFromObject(value)
+      
             
         };
         if (obj.paths[key][method].requestBody.content['application/json'].schema.required.length == 0){
-            console.log()
             delete obj.paths[key][method].requestBody.content['application/json'].schema.required
         }
-        if(obj.paths[key][method].requestBody.content['application/json'].example.length == 0 ) {
-            console.log("log le 0 ")
-        }
+      
         for (const item in requests.body.paths[key].response) {
             console.log("log for : ",item)
             const responseData = {
@@ -144,17 +142,15 @@ function ReadInit() {
             
             if (Object.keys(res.request.body).length != 0) {
                 for (const key in res.request.body) {
-                    console.log("log for obj : ",res.request.body[key])
                     const value = res.request.body[key];
-                    console.log(Func.cutStarFormObject(value))
-                    // const objectBody = {
-                    //     type: typeof value
-                    // };
+
+                    console.log("log object --> ",Func.cutStarFromObject(value))
+                 
 
                 if(Func.checkRequest(key)){
-                    responseData.content['application/json'].schema.required.push(Func.cutStarFormString(key))
+                    responseData.content['application/json'].schema.required.push(Func.cutStarFromObject(key))
                 }
-                responseData.content['application/json'].example[Func.cutStarFormString(key)] = Func.cutStarFormString(value);
+                responseData.content['application/json'].example[Func.cutStarFormString(key)] = Func.cutStarFromObject(value);
                 responseData.content['application/json'].schema.properties[Func.cutStarFormString(key)] = Func.nestObject(value);
                 
                 }

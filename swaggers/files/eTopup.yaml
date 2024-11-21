@@ -18,10 +18,35 @@ paths:
           application/json:
             schema:
               type: "object"
-              properties: {}
+              properties:
+                test3:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      test1:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            test12:
+                              type: "string"
+                            test13:
+                              type: "number"
+                          required:
+                            - "test12"
+                            - "test13"
+                      value:
+                        type: "string"
+                    required:
+                      - "test1"
               required:
                 - "test3"
-            example: {}
+            example:
+              test3:
+                - test1:
+                    - test12: "1234"
+                  value: "test3"
       parameters:
         - in: "header"
           name: "mfaf-transaction"
@@ -86,21 +111,27 @@ paths:
               schema:
                 type: "object"
                 properties:
-                  status:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        name:
-                          type: "string"
-                  message:
-                    type: "string"
+                  object1:
+                    type: "object"
+                    properties:
+                      subArray:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "object"
+                              properties:
+                                subName:
+                                  type: "string"
+                          required:
+                            - "name"
                 required:
-                  - "status"
-                  - "message"
+                  - "object1"
               example:
-                status:
-                  - *name: "statusTest"
-                message: "Success"
+                object1:
+                  subArray:
+                    - name:
+                        subName: "name0"
 security:
   - apiKey: []
