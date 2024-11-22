@@ -297,6 +297,7 @@ function CreateFileYAML(content, fileName) {
         const afterV1 = fileName.split('/v1/')[1];
 
         fs.writeFileSync(`swaggers/files/${afterV1}.yaml`, content);
+        
         // //console.log("YAML file created successfully");
     } catch (err) {
         console.error("Error writing file:", err);
