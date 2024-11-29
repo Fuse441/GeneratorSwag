@@ -14,7 +14,7 @@ function ReadInit() {
                 return reject(err);
             }
             try {
-               
+
                 const jsonData = JSON.parse(data);
                 // console.log("#42b983")
                 //  const result = YAML.stringify(jsonData);
@@ -25,7 +25,9 @@ function ReadInit() {
             }
         });
     });
-} function ReplaceData(content, requests) {
+}
+
+function ReplaceData(content, requests) {
     const obj = JSON.parse(JSON.stringify(content));
     let fileName = ""
     obj.info.title = requests.body.title;
@@ -62,9 +64,9 @@ function ReadInit() {
             }
         };
         obj.paths[key][method].tags = (requests.body.paths[key].tags)
-    
+
         for (const item in requests.body.paths[key].request.header) {
-            
+
             const objectParamerter = {
                 in: "header",
                 name: Func.cutStarFormString(item),
@@ -81,25 +83,25 @@ function ReadInit() {
 
         for (const item in requests.body.paths[key].request.body) {
             let newItem;
-            item.includes('*') ? newItem = item.replace(/\*/g,"") : newItem = item
-            
-            const value = requests.body.paths[key].request.body[item];            
-            console.log("log nest : ",JSON.stringify(Func.nestObject(value)))
+            item.includes('*') ? newItem = item.replace(/\*/g, "") : newItem = item
 
-            if(Func.checkRequest(item))
+            const value = requests.body.paths[key].request.body[item];
+            console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
+
+            if (Func.checkRequest(item))
                 obj.paths[key][method].requestBody.content['application/json'].schema.required.push(newItem)
-            
-                obj.paths[key][method].requestBody.content['application/json'].schema.properties[newItem] = Func.nestObject(value);
-                obj.paths[key][method].requestBody.content['application/json'].example[newItem] = Func.cutStarFromObject(value)
-      
-            
+
+            obj.paths[key][method].requestBody.content['application/json'].schema.properties[newItem] = Func.nestObject(value);
+            obj.paths[key][method].requestBody.content['application/json'].example[newItem] = Func.cutStarFromObject(value)
+
+
         };
-        if (obj.paths[key][method].requestBody.content['application/json'].schema.required.length == 0){
+        if (obj.paths[key][method].requestBody.content['application/json'].schema.required.length == 0) {
             delete obj.paths[key][method].requestBody.content['application/json'].schema.required
         }
-      
+
         for (const item in requests.body.paths[key].response) {
-            console.log("log for : ",item)
+            console.log("log for : ", item)
             const responseData = {
 
                 description: requests.body.paths[key].response[item].description,
@@ -124,35 +126,35 @@ function ReadInit() {
 
 
             const res = requests.body.paths[key].response[item]
-          
-                for (const key in res.request.header) {
-                    console.log("key : " , key)
-                    const value = res.request.header[key];
-                    const objectHeader = {
-                        description: Func.cutStarFormString(key),
-                        required: Func.checkRequest(key),
-                        schema: {
-                            type: typeof value,
-                            example: value
-                        }
 
+            for (const key in res.request.header) {
+                console.log("key : ", key)
+                const value = res.request.header[key];
+                const objectHeader = {
+                    description: Func.cutStarFormString(key),
+                    required: Func.checkRequest(key),
+                    schema: {
+                        type: typeof value,
+                        example: value
                     }
-                    responseData.headers[Func.cutStarFormString(key)] = objectHeader
+
                 }
-            
+                responseData.headers[Func.cutStarFormString(key)] = objectHeader
+            }
+
             if (Object.keys(res.request.body).length != 0) {
                 for (const key in res.request.body) {
                     const value = res.request.body[key];
 
-                    console.log("log object --> ",Func.cutStarFromObject(value))
-                 
+                    console.log("log object --> ", Func.cutStarFromObject(value))
 
-                if(Func.checkRequest(key)){
-                    responseData.content['application/json'].schema.required.push(Func.cutStarFromObject(key))
-                }
-                responseData.content['application/json'].example[Func.cutStarFormString(key)] = Func.cutStarFromObject(value);
-                responseData.content['application/json'].schema.properties[Func.cutStarFormString(key)] = Func.nestObject(value);
-                
+
+                    if (Func.checkRequest(key)) {
+                        responseData.content['application/json'].schema.required.push(Func.cutStarFromObject(key))
+                    }
+                    responseData.content['application/json'].example[Func.cutStarFormString(key)] = Func.cutStarFromObject(value);
+                    responseData.content['application/json'].schema.properties[Func.cutStarFormString(key)] = Func.nestObject(value);
+
                 }
             } else {
                 delete responseData.content['application/json'].schema.required
@@ -245,7 +247,7 @@ function ReadInit() {
             }
 
         }
-        
+
     }
 
 
@@ -253,38 +255,6 @@ function ReadInit() {
     return { yamlData, fileName };
 
 }
-
-function checkAndAct(text) {
-    // //console.log(typeof text);
-    if (typeof text === 'object' && text !== null) {
-        const object = {};
-        for (const key in text) {
-            if (key.includes('@')) {
-                // //console.log("log for : " + key)
-                object[key] = `${text[key]}`;
-                delete object[key]
-                const keyTemp = `'${key}'`
-                const objTemp = {
-                    [keyTemp]: text[key]
-                }
-                Object.assign(object, objTemp)
-                // delete object[key]
-                // object = {
-                //     "asd" : "test"
-                // }
-
-            } else {
-                object[key] = text[key];
-            }
-        }
-        // //console.log("log object: " + JSON.stringify(object));
-        return object;
-    }
-    return text;
-}
-
-
-
 
 function CreateFileYAML(content, fileName) {
     // //console.log("Content to write:", content); 
@@ -297,7 +267,7 @@ function CreateFileYAML(content, fileName) {
         const afterV1 = fileName.split('/v1/')[1];
 
         fs.writeFileSync(`swaggers/files/${afterV1}.yaml`, content);
-        
+
         // //console.log("YAML file created successfully");
     } catch (err) {
         console.error("Error writing file:", err);
@@ -305,8 +275,124 @@ function CreateFileYAML(content, fileName) {
     }
 }
 
+function TransformSheetData(sheetData) {
+    const result = {
+        title: "",
+        version: "",
+        description: "",
+        contact: "",
+        servers: [],
+        paths: {},
+    };
+
+    let currentSection = "";
+    let currentUri = "";
+    let currentMethod = "";
+    let currentStatus = "";
+    let currentResponseKey = "";
+
+    sheetData.forEach((element) => {
+        if (element.Section) {
+            currentSection = element.Section; // Update the current section
+        } else {
+            switch (currentSection) {
+                case "Metadata":
+                    if (element.Key === "title") result.title = element.Value;
+                    if (element.Key === "version") result.version = element.Value;
+                    if (element.Key === "description") result.description = element.Value;
+                    if (element.Key === "contact") result.contact = element.Value;
+                    if (element.Key === "servers") result.servers.push(element.Value);
+                    if (element.Key === "uri") currentUri = element.Value;
+                    if (element.Key === "method") currentMethod = element.Value;
+                    if (currentUri && !result.paths[currentUri]) {
+                        result.paths[currentUri] = {};
+                    }
+                    if (!!currentMethod) {
+                        result.paths[currentUri]["method"] = element.Value
+                    }
+
+                    if (currentUri && currentMethod) {
+                        console.log("log for : ", result.paths[currentUri].method)
+                        result.paths[currentUri] = {
+                            method: currentMethod,
+                            tags: [],
+                            request: {
+                                header: {},
+                                body: {},
+                            },
+                            response: {},
+                        };
+                    }
+                    break;
+                case "Header":
+                    if (currentUri && currentMethod) {
+                        result.paths[currentUri].request.header[
+                            element.Key
+                        ] = element.Value;
+                    }
+                    break;
+                case "Body":
+                    if (currentUri && currentMethod) {
+                        const cleanJSON = element.Value.replace(/\\r\\n/g, "").trim();
+                        try {
+                            const parsedJSON = Func.fixJSON(cleanJSON); // แก้ JSON ที่ไม่สมบูรณ์
+                            result.paths[currentUri].request.body[
+                                element.Key
+                            ] = parsedJSON;
+                        } catch (error) {
+                            console.error(
+                                "JSON parsing error:",
+                                error.message,
+                                "Clean JSON:",
+                                cleanJSON
+                            );
+                        }
+                    }
+                    break;
+                case "Response":
+                    if (currentUri && currentMethod) {
+                        if (element.Key === "HTTP_Status") {
+                            currentStatus = element.Value;
+                            result.paths[currentUri].response[currentStatus] = {
+                                request: {}
+                            }
+                        }
+                        if (element.subKey === "description") {
+                            result.paths[currentUri].response[currentStatus][element.subKey] = element.Value
+                        }
+                        if (Object.hasOwn(element, 'Key')) {
+                            currentResponseKey = element.Key
+                        }
+                        if (currentResponseKey === "header" && Object.hasOwn(element, 'Value') && !!element?.Value) {
+                            Object.assign(result.paths[currentUri].response[currentStatus].request, {
+                                header: {
+                                    ...result.paths[currentUri].response[currentStatus].request?.header,
+                                    [element.subKey]: element.Value
+                                }
+                            })
+                        }
+
+                        if (currentResponseKey === "body" && Object.hasOwn(element, 'Value') && element?.subKey == "item") {
+                            const cleanJSON = element.Value.replace(/\\r\\n/g, "").trim();
+                            const parsedJSON = Func.fixJSON(cleanJSON); // แก้ JSON ที่ไม่สมบูรณ์
+                            Object.assign(result.paths[currentUri].response[currentStatus].request, {
+                                body: parsedJSON
+                            })
+                        }
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+    });
+
+    return result;
+}
+
 module.exports = {
     ReadInit,
     CreateFileYAML,
-    ReplaceData
+    ReplaceData,
+    TransformSheetData
 };

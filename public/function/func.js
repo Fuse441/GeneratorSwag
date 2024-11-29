@@ -14,6 +14,15 @@ module.exports.cutStarFormString = function (key) {
     else return key
 }
 
+module.exports.fixJSON = function (jsonString) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (e) {
+    const fixed = jsonString.trim().replace(/}+$/, "}").replace(/]+$/, "]");
+    return JSON.parse(fixed);
+  }
+}
+
 module.exports.cutStarFromObject = function (data) {
     if (Array.isArray(data)) {
       return data.map(element => this.cutStarFromObject(element));
