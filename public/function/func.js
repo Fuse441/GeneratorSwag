@@ -15,6 +15,8 @@ module.exports.cutStarFormString = function (key) {
 }
 
 module.exports.fixJSON = function (jsonString) {
+  // jsonString = jsonString.replace('/\\r\\n/g',"")
+
   try {
     return JSON.parse(jsonString);
   } catch (e) {
@@ -22,6 +24,7 @@ module.exports.fixJSON = function (jsonString) {
     return JSON.parse(fixed);
   }
 }
+
 
 module.exports.cutStarFromObject = function (data) {
     if (Array.isArray(data)) {

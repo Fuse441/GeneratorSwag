@@ -6,13 +6,15 @@ info:
   contact:
     name: "T3"
     url: ".."
+
 servers:
-  - url: "http://api.example.com/v1"
+- url: "http://api.example.com/v1"
+  description: "test load akakaka"
 paths:
   /api/v1/eTopup:
     get:
       tags:
-        - "1234"
+      - "1234"
       requestBody:
         content:
           application/json:
@@ -34,68 +36,68 @@ paths:
                             test13:
                               type: "number"
                           required:
-                            - "test12"
-                            - "test13"
+                          - "test12"
+                          - "test13"
                       value:
                         type: "string"
                     required:
-                      - "test1"
+                    - "test1"
               required:
-                - "test3"
+              - "test3"
             example:
               test3:
-                - test1:
-                    - test12: "1234"
-                  value: "test3"
+              - test1:
+                - test12: "1234"
+                value: "test3"
       parameters:
-        - in: "header"
-          name: "mfaf-transaction"
-          schema:
-            type: "string"
-          required: true
-          description: "mfaf-transaction"
-        - in: "header"
-          name: "mfaf-broker"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-broker"
-        - in: "header"
-          name: "mfaf-channel"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-channel"
-        - in: "header"
-          name: "mfaf-device"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-device"
-        - in: "header"
-          name: "mfaf-public"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-public"
-        - in: "header"
-          name: "mfaf-useCase"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-useCase"
-        - in: "header"
-          name: "mfaf-useCaseStep"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-useCaseStep"
-        - in: "header"
-          name: "mfaf-user"
-          schema:
-            type: "string"
-          required: false
-          description: "mfaf-user"
+      - in: "header"
+        name: "mfaf-transaction"
+        schema:
+          type: "string"
+        required: true
+        description: "mfaf-transaction"
+      - in: "header"
+        name: "mfaf-broker"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-broker"
+      - in: "header"
+        name: "mfaf-channel"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-channel"
+      - in: "header"
+        name: "mfaf-device"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-device"
+      - in: "header"
+        name: "mfaf-public"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-public"
+      - in: "header"
+        name: "mfaf-useCase"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-useCase"
+      - in: "header"
+        name: "mfaf-useCaseStep"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-useCaseStep"
+      - in: "header"
+        name: "mfaf-user"
+        schema:
+          type: "string"
+        required: false
+        description: "mfaf-user"
       responses:
         200:
           description: "case 200"
@@ -125,13 +127,13 @@ paths:
                                 subName:
                                   type: "string"
                           required:
-                            - "name"
+                          - "name"
                 required:
-                  - "object1"
+                - "object1"
               example:
                 object1:
                   subArray:
-                    - name:
-                        subName: "name0"
+                  - name:
+                      subName: "name0"
 security:
-  - apiKey: []
+- apiKey: []
