@@ -272,8 +272,31 @@ function TransformSheetData(metaSheet, sheetData) {
     paths: {},
   };
 
+  const state = {
+      currentUri: null,
+      currentMethod: null,
+      isRequest: false,
+      isResponse: false
+  }
   const actions = new Map([
-    ["description", (key, element) => (result.description = element.value)],
+    ["description", (key, element) => {
+        const description = element.value;
+        if(!state.isResponse){
+            result.description = description
+        } else {
+            //NOTE: iterator over keys object
+            const keys = Object.keys(result.paths[state.currentUri]["response"])
+
+            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
+                const description = value
+                if(index == 0) continue;
+                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]],{
+                    description: description
+                })
+            }
+        }
+        
+    }],
     [
       "reference",
       (key, element) =>
@@ -287,8 +310,89 @@ function TransformSheetData(metaSheet, sheetData) {
         const newArray =  parts.map((item =>item.replace("@","")))
             result.servers.push(...newArray);
     }],
-    ["paths",(key,element) => {
-        
+    ["uri",(key,element) => {
+        result.paths[element.value] = {}
+        state.currentUri = element.value
+    }],
+    ["method",(key,element) => {
+        result.paths[state.currentUri][element.value] = {
+            method: element.value
+        }
+        Object.assign(result.paths[state.currentUri], {
+            method: element.value
+        })
+        state.currentMethod = element.value
+    }],
+    ["Request",(key,element) => {
+        state.isRequest = true;
+        state.isResponse = false;
+    }],
+    ["Response",(key,element) => {
+        state.isResponse = true;
+        state.isRequest = false;
+    }],
+    ["header",(key,element) => {
+        const parsedValue = JSON.parse(element.value)
+
+        if(state.isRequest){
+            result.paths[state.currentUri]["request"] = 
+            Object.assign(result.paths[state.currentUri]["request"] || {}, {
+                header: parsedValue
+            })
+        }
+
+        if(state.isResponse){
+            //NOTE: iterator over keys object
+            const keys = Object.keys(result.paths[state.currentUri]["response"])
+
+            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
+                if(index == 0) continue;
+                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]] || {},{
+                    request: {
+                        ...result.paths[state.currentUri]["response"][keys[index-1]]["request"],
+                        header: parsedValue
+                    }
+                })
+            }
+        }
+    }],
+    ["body",(key,element) => {
+        const parsedValue = JSON.parse(element.value)
+        const bodyDetail = {
+            item: parsedValue         
+        }
+        if(state.isRequest){
+            result.paths[state.currentUri]["request"] = 
+            Object.assign(result.paths[state.currentUri]["request"] || {}, {
+                body: bodyDetail
+            })
+        }
+
+        if(state.isResponse){
+            //NOTE: iterator over keys object
+            const keys = Object.keys(result.paths[state.currentUri]["response"])
+
+            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
+                if(index == 0) continue;
+                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]], {
+                    request: {
+                        ...result.paths[state.currentUri]["response"][keys[index-1]]["request"],
+                        body: bodyDetail
+                    }
+                })
+            }
+        }
+    }],
+    ["http status",(key,element) => {
+        //NOTE: iterate over keys object
+        for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
+            if(isNaN(value)) continue;
+            if(index == 0) continue;
+            result.paths[state.currentUri]["response"] = 
+            Object.assign(result.paths[state.currentUri]["response"] || {}, {
+                [value]: {}
+            })
+        }
     }]
   ]);
 
