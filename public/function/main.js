@@ -275,6 +275,7 @@ function TransformSheetData(metaSheet, sheetData) {
   const state = {
       currentUri: null,
       currentMethod: null,
+      currentHttpStatus: null,
       isRequest: false,
       isResponse: false
   }
@@ -284,16 +285,7 @@ function TransformSheetData(metaSheet, sheetData) {
         if(!state.isResponse){
             result.description = description
         } else {
-            //NOTE: iterator over keys object
-            const keys = Object.keys(result.paths[state.currentUri]["response"])
-
-            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
-                const description = value
-                if(index == 0) continue;
-                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]],{
-                    description: description
-                })
-            }
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["description"] = description
         }
         
     }],
@@ -315,9 +307,6 @@ function TransformSheetData(metaSheet, sheetData) {
         state.currentUri = element.value
     }],
     ["method",(key,element) => {
-        result.paths[state.currentUri][element.value] = {
-            method: element.value
-        }
         Object.assign(result.paths[state.currentUri], {
             method: element.value
         })
@@ -342,18 +331,10 @@ function TransformSheetData(metaSheet, sheetData) {
         }
 
         if(state.isResponse){
-            //NOTE: iterator over keys object
-            const keys = Object.keys(result.paths[state.currentUri]["response"])
-
-            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
-                if(index == 0) continue;
-                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]] || {},{
-                    request: {
-                        ...result.paths[state.currentUri]["response"][keys[index-1]]["request"],
-                        header: parsedValue
-                    }
-                })
-            }
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
+            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
+            header: parsedValue
+          }
         }
     }],
     ["body",(key,element) => {
@@ -369,29 +350,17 @@ function TransformSheetData(metaSheet, sheetData) {
         }
 
         if(state.isResponse){
-            //NOTE: iterator over keys object
-            const keys = Object.keys(result.paths[state.currentUri]["response"])
-
-            for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
-                if(index == 0) continue;
-                Object.assign(result.paths[state.currentUri]["response"][keys[index-1]], {
-                    request: {
-                        ...result.paths[state.currentUri]["response"][keys[index-1]]["request"],
-                        body: bodyDetail
-                    }
-                })
-            }
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
+            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
+            body: bodyDetail
+          }
         }
     }],
     ["http status",(key,element) => {
-        //NOTE: iterate over keys object
-        for (const [index, [key, value]] of Object.entries(Object.entries(element))) {
-            if(isNaN(value)) continue;
-            if(index == 0) continue;
-            result.paths[state.currentUri]["response"] = 
-            Object.assign(result.paths[state.currentUri]["response"] || {}, {
-                [value]: {}
-            })
+        state.currentHttpStatus = element.value
+        result.paths[state.currentUri]["response"] = {
+            ...result.paths[state.currentUri]["response"],
+            [element.value]: {}         
         }
     }]
   ]);

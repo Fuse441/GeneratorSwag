@@ -53,20 +53,20 @@ router.post("/excel", upload.single("file"), async (req, res) => {
     const metaSheet = sheetName.split('-');
     
   
-     const transformedData = TransformSheetData(metaSheet,sheetData);
+    const transformedData = TransformSheetData(metaSheet,sheetData);
 
-     const fileData = await ReadInit();
-     const { yamlData, fileName } = ReplaceData(fileData, {
-         body: transformedData
-     });
-     const afterV1 = fileName.split("/v1/")[1] || "default";
-     const fileNameWithExt = `${afterV1}.yaml`;
+    const fileData = await ReadInit();
+    const { yamlData, fileName } = ReplaceData(fileData, {
+        body: transformedData
+    });
+    const afterV1 = fileName.split("/v1/")[1] || "default";
+    const fileNameWithExt = `${afterV1}.yaml`;
 
-     res.setHeader(
-         "Content-Disposition",
-         `attachment; filename="${fileNameWithExt}"`
-     );
-     res.setHeader("Content-Type", "application/x-yaml");
+    res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileNameWithExt}"`
+    );
+    res.setHeader("Content-Type", "application/x-yaml");
 
     res.send(yamlData).end();
 });
