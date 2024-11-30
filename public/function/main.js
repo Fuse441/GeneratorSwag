@@ -272,8 +272,23 @@ function TransformSheetData(metaSheet, sheetData) {
     paths: {},
   };
 
+  const state = {
+      currentUri: null,
+      currentMethod: null,
+      currentHttpStatus: null,
+      isRequest: false,
+      isResponse: false
+  }
   const actions = new Map([
-    ["description", (key, element) => (result.description = element.value)],
+    ["description", (key, element) => {
+        const description = element.value;
+        if(!state.isResponse){
+            result.description = description
+        } else {
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["description"] = description
+        }
+        
+    }],
     [
       "reference",
       (key, element) =>
@@ -287,8 +302,66 @@ function TransformSheetData(metaSheet, sheetData) {
         const newArray =  parts.map((item =>item.replace("@","")))
             result.servers.push(...newArray);
     }],
-    ["paths",(key,element) => {
-        
+    ["uri",(key,element) => {
+        result.paths[element.value] = {}
+        state.currentUri = element.value
+    }],
+    ["method",(key,element) => {
+        Object.assign(result.paths[state.currentUri], {
+            method: element.value
+        })
+        state.currentMethod = element.value
+    }],
+    ["Request",(key,element) => {
+        state.isRequest = true;
+        state.isResponse = false;
+    }],
+    ["Response",(key,element) => {
+        state.isResponse = true;
+        state.isRequest = false;
+    }],
+    ["header",(key,element) => {
+        const parsedValue = JSON.parse(element.value)
+
+        if(state.isRequest){
+            result.paths[state.currentUri]["request"] = 
+            Object.assign(result.paths[state.currentUri]["request"] || {}, {
+                header: parsedValue
+            })
+        }
+
+        if(state.isResponse){
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
+            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
+            header: parsedValue
+          }
+        }
+    }],
+    ["body",(key,element) => {
+        const parsedValue = JSON.parse(element.value)
+        const bodyDetail = {
+            item: parsedValue         
+        }
+        if(state.isRequest){
+            result.paths[state.currentUri]["request"] = 
+            Object.assign(result.paths[state.currentUri]["request"] || {}, {
+                body: bodyDetail
+            })
+        }
+
+        if(state.isResponse){
+          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
+            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
+            body: bodyDetail
+          }
+        }
+    }],
+    ["http status",(key,element) => {
+        state.currentHttpStatus = element.value
+        result.paths[state.currentUri]["response"] = {
+            ...result.paths[state.currentUri]["response"],
+            [element.value]: {}         
+        }
     }]
   ]);
 
