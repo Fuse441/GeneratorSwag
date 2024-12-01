@@ -1,5 +1,9 @@
 const e = require("express");
-
+const XLSX = require("xlsx");
+const { ReadInit,
+  ReplaceData,
+  TransformSheetData
+} = require("../function/main");
 module.exports.checkRequest = function (key) {
     if (typeof key == "string" && key.includes('*')) {
         return true
@@ -95,4 +99,26 @@ module.exports.cutStarFromObject = function (data) {
 
 
 
+module.exports.loopSheets = async function (filePath) {
+  const workbook = XLSX.read(filePath);
+  const sheetArray = workbook.SheetNames;
+
+
+  const resultPromises = sheetArray.map(async (sheetName, index) => {
+    console.log(sheetName);
+
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const metaSheet = sheetName.split("-");
+
+    const transformedData = TransformSheetData(metaSheet, sheetData);
+    // console.log("check : ",transformedData)
+ 
+
+    return transformedData; 
+  });
+
+  const results = await Promise.all(resultPromises);
+
+  return results;
+};
 

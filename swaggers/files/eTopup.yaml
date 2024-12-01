@@ -1,139 +1,114 @@
 openapi: "3.0.0"
 info:
-  title: "AC-Payment [ETopUp API]"
+  title: "api01"
   version: "1.0.0"
-  description: "Swagger ETopUp API"
+  description: "hahahah"
   contact:
     name: "T3"
-    url: ".."
-
+    url: "http://google.com"
 servers:
-- url: "http://api.example.com/v1"
-  description: "test load akakaka"
+  - url: "http://10.138.47.138:8080"
+  - url: "https://google.com"
 paths:
-  /api/v1/eTopup:
+  /api/v1:
     get:
       tags:
-      - "1234"
+        - "API TEST1"
       requestBody:
         content:
           application/json:
             schema:
               type: "object"
-              properties:
-                test3:
-                  type: "array"
-                  items:
-                    type: "object"
-                    properties:
-                      test1:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            test12:
-                              type: "string"
-                            test13:
-                              type: "number"
-                          required:
-                          - "test12"
-                          - "test13"
-                      value:
-                        type: "string"
-                    required:
-                    - "test1"
-              required:
-              - "test3"
-            example:
-              test3:
-              - test1:
-                - test12: "1234"
-                value: "test3"
+              properties: {}
+            example: {}
       parameters:
-      - in: "header"
-        name: "mfaf-transaction"
-        schema:
-          type: "string"
-        required: true
-        description: "mfaf-transaction"
-      - in: "header"
-        name: "mfaf-broker"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-broker"
-      - in: "header"
-        name: "mfaf-channel"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-channel"
-      - in: "header"
-        name: "mfaf-device"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-device"
-      - in: "header"
-        name: "mfaf-public"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-public"
-      - in: "header"
-        name: "mfaf-useCase"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-useCase"
-      - in: "header"
-        name: "mfaf-useCaseStep"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-useCaseStep"
-      - in: "header"
-        name: "mfaf-user"
-        schema:
-          type: "string"
-        required: false
-        description: "mfaf-user"
+        - in: "header"
+          name: "key"
+          schema:
+            type: "string"
+          required: false
+          description: "key"
       responses:
         200:
-          description: "case 200"
+          description: "Success"
           headers:
             content-type:
               description: "content-type"
-              required: true
+              required: false
               schema:
                 type: "string"
-                example: "application/json"
+                example: "app/json"
           content:
             application/json:
               schema:
                 type: "object"
                 properties:
-                  object1:
+                  item:
                     type: "object"
                     properties:
-                      subArray:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            name:
-                              type: "object"
-                              properties:
-                                subName:
-                                  type: "string"
-                          required:
-                          - "name"
-                required:
-                - "object1"
+                      a:
+                        type: "object"
+                        properties:
+                          d:
+                            type: "array"
+                            items: {}
               example:
-                object1:
-                  subArray:
-                  - name:
-                      subName: "name0"
+                item:
+                  a:
+                    d: []
+        201:
+          description: "created"
+          headers:
+            content-type:
+              description: "content-type"
+              required: false
+              schema:
+                type: "string"
+                example: "app/json"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  item:
+                    type: "object"
+                    properties:
+                      b:
+                        type: "object"
+                        properties:
+                          d:
+                            type: "array"
+                            items: {}
+              example:
+                item:
+                  b:
+                    d: []
+        400:
+          description: "bad request"
+          headers:
+            content-type:
+              description: "content-type"
+              required: false
+              schema:
+                type: "string"
+                example: "app/json"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  item:
+                    type: "object"
+                    properties:
+                      c:
+                        type: "object"
+                        properties:
+                          d:
+                            type: "array"
+                            items: {}
+              example:
+                item:
+                  c:
+                    d: []
 security:
-- apiKey: []
+  - apiKey: []

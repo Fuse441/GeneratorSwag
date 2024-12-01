@@ -25,20 +25,22 @@ function ReadInit() {
   });
 }
 
-function ReplaceData(content, requests) {
+async function ReplaceData(content, request) {
+
+  const mapYAML = request.body.map(async (element) => {
+
   const obj = JSON.parse(JSON.stringify(content));
   let fileName = "";
-  obj.info.title = requests.body.title;
-  obj.info.version = requests.body.version;
-  obj.info.description = requests.body.description;
-  obj.info.contact = requests.body.contact;
-
-  obj.servers = requests.body.servers.map((item) => ({ url: item }));
-
+  obj.info.title = element.title;
+  obj.info.version = element.version;
+  obj.info.description = element.description;
+  obj.info.contact = element.contact;
+  obj.servers = element.servers.map((item) => ({ url: item }));
   obj.paths = {};
-  for (const key in requests.body.paths) {
+     
+      for (const key in element.paths) {
     fileName = key;
-    const method = requests.body.paths[key].method
+    const method = element.paths[key].method
       .toLowerCase()
       .replace(/['"]+/g, "");
     obj.paths[key] = {
@@ -60,9 +62,9 @@ function ReplaceData(content, requests) {
         responses: {},
       },
     };
-    obj.paths[key][method].tags = requests.body.paths[key].tags;
+    obj.paths[key][method].tags = element.paths[key].tags;
 
-    for (const item in requests.body.paths[key].request.header) {
+    for (const item in element.paths[key].request.header) {
       const objectParamerter = {
         in: "header",
         name: Func.cutStarFormString(item),
@@ -74,14 +76,13 @@ function ReplaceData(content, requests) {
       };
       obj.paths[key][method].parameters.push(objectParamerter);
     }
-
-    for (const item in requests.body.paths[key].request.body) {
+       for (const item in element.paths[key].request.body) {
       let newItem;
       item.includes("*")
         ? (newItem = item.replace(/\*/g, ""))
         : (newItem = item);
 
-      const value = requests.body.paths[key].request.body[item];
+      const value = element.paths[key].request.body[item];
       // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
 
       if (Func.checkRequest(item))
@@ -104,10 +105,9 @@ function ReplaceData(content, requests) {
         .schema.required;
     }
 
-    for (const item in requests.body.paths[key].response) {
-      // console.log("log for : ", item)
+    for (const item in element.paths[key].response) {
       const responseData = {
-        description: requests.body.paths[key].response[item].description,
+        description: element.paths[key].response[item].description,
         headers: {},
 
         content: {
@@ -122,7 +122,7 @@ function ReplaceData(content, requests) {
         },
       };
 
-      const res = requests.body.paths[key].response[item];
+      const res = element.paths[key].response[item];
 
       for (const key in res.request.header) {
         const value = res.request.header[key];
@@ -153,108 +153,195 @@ function ReplaceData(content, requests) {
             Func.cutStarFormString(key)
           ] = Func.nestObject(value);
         }
-      } else {
-        delete responseData.content["application/json"].schema.required;
-      }
+      } 
+      if(responseData.content["application/json"].schema.required.length == 0)
+        delete responseData.content["application/json"].schema.required
 
-      try {
-        obj.paths[key][method].responses[item] = responseData;
-      } catch (error) {
-        console.log("catch : ", error);
-      }
 
-      // }
-
-      // for (const key in res.nonRquire.header) {
-      //     const value = res.nonRquire.header[key];
-      //     const objectHeader = {
-      //         description: key,
-      //         required: true,
-      //         schema: {
-      //             type: typeof value,
-
-      //         }
-
-      //     }
-      //     responseData.headers[key] = objectHeader
-      // }
-
-      // for (const key in res.nonRquire.body) {
-      //     const value = res.nonRquire.body[key];
-
-      //     let objectBody;
-
-      //     if (Array.isArray(value)) {
-
-      //         objectBody = {
-      //             example: value.map(item => checkAndAct(item))
-      //         };
-      //     } else if (typeof value === "object" && value !== null) {
-      //         objectBody = {
-      //             type: typeof checkAndAct(value)
-      //         };
-      //     } else if (typeof value === "string") {
-      //         objectBody = {
-      //             type: typeof checkAndAct(value)
-      //         };
-      //     } else {
-      //         objectBody = {
-      //             type: typeof value
-      //         };
-      //     }
-      //     // //console.log("object Body : ",objectBody)
-
-      //     responseData.content['application/json'].example[key] = value;
-      //     responseData.content['application/json'].schema.properties[key] = objectBody;
-      // }
-
+     
       try {
         obj.paths[key][method].responses[item] = responseData;
       } catch (error) {
         console.log("catch : ", error);
       }
     }
-    const objectAppError = {
-      description: "",
-      headers: {
-        "content-type": {
-          description: "content-type",
-          required: true,
-          schema: {
-            type: "string",
-            example: "",
-          },
-        },
-      },
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {},
-          },
-          examples: {},
-        },
-      },
-    };
   }
+    
+  console.log("==>" ,obj)
+  return obj
+  }
+  
+ )
 
-  const yamlData = YAML.stringify(obj);
-  return { yamlData, fileName };
+ const result = await Promise.all(mapYAML)
+ 
+return  YAML.stringify(result)
 }
 
+
+
+
+ 
+  
+  
+  // }
+  
+
+  // const obj = JSON.parse(JSON.stringify(content));
+  // let fileName = "";
+  // obj.info.title = element.title;
+  // obj.info.version = requests.body.version;
+  // obj.info.description = requests.body.description;
+  // obj.info.contact = requests.body.contact;
+
+  // obj.servers = requests.body.servers.map((item) => ({ url: item }));
+
+  // obj.paths = {};
+  // for (const key in requests.body.paths) {
+  //   fileName = key;
+  //   const method = requests.body.paths[key].method
+  //     .toLowerCase()
+  //     .replace(/['"]+/g, "");
+  //   obj.paths[key] = {
+  //     [method]: {
+  //       tags: [],
+  //       requestBody: {
+  //         content: {
+  //           "application/json": {
+  //             schema: {
+  //               type: "object",
+  //               properties: {},
+  //               required: [],
+  //             },
+  //             example: {},
+  //           },
+  //         },
+  //       },
+  //       parameters: [],
+  //       responses: {},
+  //     },
+  //   };
+  //   obj.paths[key][method].tags = requests.body.paths[key].tags;
+
+  //   for (const item in requests.body.paths[key].request.header) {
+  //     const objectParamerter = {
+  //       in: "header",
+  //       name: Func.cutStarFormString(item),
+  //       schema: {
+  //         type: typeof item,
+  //       },
+  //       required: Func.checkRequest(item),
+  //       description: Func.cutStarFormString(item),
+  //     };
+  //     obj.paths[key][method].parameters.push(objectParamerter);
+  //   }
+
+  //   for (const item in requests.body.paths[key].request.body) {
+  //     let newItem;
+  //     item.includes("*")
+  //       ? (newItem = item.replace(/\*/g, ""))
+  //       : (newItem = item);
+
+  //     const value = requests.body.paths[key].request.body[item];
+  //     // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
+
+  //     if (Func.checkRequest(item))
+  //       obj.paths[key][method].requestBody.content[
+  //         "application/json"
+  //       ].schema.required.push(newItem);
+
+  //     obj.paths[key][method].requestBody.content[
+  //       "application/json"
+  //     ].schema.properties[newItem] = Func.nestObject(value);
+  //     obj.paths[key][method].requestBody.content["application/json"].example[
+  //       newItem
+  //     ] = Func.cutStarFromObject(value);
+  //   }
+  //   if (
+  //     obj.paths[key][method].requestBody.content["application/json"].schema
+  //       .required.length == 0
+  //   ) {
+  //     delete obj.paths[key][method].requestBody.content["application/json"]
+  //       .schema.required;
+  //   }
+
+  //   for (const item in requests.body.paths[key].response) {
+  //     const responseData = {
+  //       description: requests.body.paths[key].response[item].description,
+  //       headers: {},
+
+  //       content: {
+  //         "application/json": {
+  //           schema: {
+  //             type: "object",
+  //             properties: {},
+  //             required: [],
+  //           },
+  //           example: {},
+  //         },
+  //       },
+  //     };
+
+  //     const res = requests.body.paths[key].response[item];
+
+  //     for (const key in res.request.header) {
+  //       const value = res.request.header[key];
+  //       const objectHeader = {
+  //         description: Func.cutStarFormString(key),
+  //         required: Func.checkRequest(key),
+  //         schema: {
+  //           type: typeof value,
+  //           example: value,
+  //         },
+  //       };
+  //       responseData.headers[Func.cutStarFormString(key)] = objectHeader;
+  //     }
+
+  //     if (Object.keys(res.request.body).length != 0) {
+  //       for (const key in res.request.body) {
+  //         const value = res.request.body[key];
+
+  //         if (Func.checkRequest(key)) {
+  //           responseData.content["application/json"].schema.required.push(
+  //             Func.cutStarFromObject(key)
+  //           );
+  //         }
+  //         responseData.content["application/json"].example[
+  //           Func.cutStarFormString(key)
+  //         ] = Func.cutStarFromObject(value);
+  //         responseData.content["application/json"].schema.properties[
+  //           Func.cutStarFormString(key)
+  //         ] = Func.nestObject(value);
+  //       }
+  //     } 
+  //     if(responseData.content["application/json"].schema.required.length == 0)
+  //       delete responseData.content["application/json"].schema.required
+
+
+     
+  //     try {
+  //       obj.paths[key][method].responses[item] = responseData;
+  //     } catch (error) {
+  //       console.log("catch : ", error);
+  //     }
+  //   }
+ 
+  // }
+
+  // const yamlData = YAML.stringify(obj);
+  // return { yamlData, fileName };
+
+
 function CreateFileYAML(content, fileName) {
-  // //console.log("Content to write:", content);
   try {
     if (!content) {
       console.error("No content provided to CreateFileYAML");
       return;
     }
-    // const path = "/api/v1/communicationMessage";
     const afterV1 = fileName.split("/v1/")[1];
 
     fs.writeFileSync(`swaggers/files/${afterV1}.yaml`, content);
 
-    // //console.log("YAML file created successfully");
   } catch (err) {
     console.error("Error writing file:", err);
     throw err;
@@ -266,29 +353,42 @@ function TransformSheetData(metaSheet, sheetData) {
   const result = {
     title: title,
     version: version,
+    tags : [],
     description: "",
     contact: "",
     servers: [],
-    paths: {},
+    paths: {
+    
+    },
   };
 
   const state = {
-      currentUri: null,
-      currentMethod: null,
-      currentHttpStatus: null,
-      isRequest: false,
-      isResponse: false
-  }
+    currentUri: null,
+    currentMethod: null,
+    currentHttpStatus: null,
+    isRequest: false,
+    isResponse: false,
+  };
   const actions = new Map([
-    ["description", (key, element) => {
+    [
+      "tag",
+      (key, element) => {
+        result.tags.push( element.value)
+      },
+    ],
+    [
+      "description",
+      (key, element) => {
         const description = element.value;
-        if(!state.isResponse){
-            result.description = description
+        if (!state.isResponse) {
+          result.description = description;
         } else {
-          result.paths[state.currentUri]["response"][state.currentHttpStatus]["description"] = description
+          result.paths[state.currentUri]["response"][state.currentHttpStatus][
+            "description"
+          ] = description;
         }
-        
-    }],
+      },
+    ],
     [
       "reference",
       (key, element) =>
@@ -297,81 +397,122 @@ function TransformSheetData(metaSheet, sheetData) {
           url: element.value.split("@")[1],
         }),
     ],
-    ["servers", (key, element) => {
-        const parts = element.value.split("\r\n");
-        const newArray =  parts.map((item =>item.replace("@","")))
-            result.servers.push(...newArray);
-    }],
-    ["uri",(key,element) => {
-        result.paths[element.value] = {}
-        state.currentUri = element.value
-    }],
-    ["method",(key,element) => {
+    [
+      "servers",
+      (key, element) => {
+      
+        const parts = element.value.split(/\r\n|\n/);
+     
+        const newArray = parts.map((item) => item.replace("@", ""));
+        result.servers.push(...newArray);
+     
+      },
+    ],
+    [
+      "uri",
+      (key, element) => {
+        result.paths[element.value] = {};
+        state.currentUri = element.value;
+      },
+    ],
+    [
+      "method",
+      (key, element) => {
         Object.assign(result.paths[state.currentUri], {
-            method: element.value
-        })
-        state.currentMethod = element.value
-    }],
-    ["Request",(key,element) => {
+          method: element.value,
+          tags : result.tags
+        });
+        delete result.tags
+        state.currentMethod = element.value;
+      },
+    ],
+    [
+      "Request",
+      (key, element) => {
         state.isRequest = true;
         state.isResponse = false;
-    }],
-    ["Response",(key,element) => {
+      },
+    ],
+    [
+      "Response",
+      (key, element) => {
         state.isResponse = true;
         state.isRequest = false;
-    }],
-    ["header",(key,element) => {
-        const parsedValue = JSON.parse(element.value)
+      },
+    ],
+    [
+      "header",
+      (key, element) => {
+        const parsedValue = JSON.parse(element.value);
 
-        if(state.isRequest){
-            result.paths[state.currentUri]["request"] = 
-            Object.assign(result.paths[state.currentUri]["request"] || {}, {
-                header: parsedValue
-            })
+        if (state.isRequest) {
+          result.paths[state.currentUri]["request"] = Object.assign(
+            result.paths[state.currentUri]["request"] || {},
+            {
+              header: parsedValue,
+            }
+          );
         }
 
-        if(state.isResponse){
-          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
-            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
-            header: parsedValue
-          }
+        if (state.isResponse) {
+          result.paths[state.currentUri]["response"][state.currentHttpStatus][
+            "request"
+          ] = {
+            ...result.paths[state.currentUri]["response"][
+              state.currentHttpStatus
+            ]["request"],
+            header: parsedValue,
+          };
         }
-    }],
-    ["body",(key,element) => {
-        const parsedValue = JSON.parse(element.value)
+      },
+    ],
+    [
+      "body",
+      (key, element) => {
+        const parsedValue = JSON.parse(element.value);
         const bodyDetail = {
-            item: parsedValue         
-        }
-        if(state.isRequest){
-            result.paths[state.currentUri]["request"] = 
-            Object.assign(result.paths[state.currentUri]["request"] || {}, {
-                body: bodyDetail
-            })
+          item: parsedValue,
+        };
+        if (state.isRequest) {
+          result.paths[state.currentUri]["request"] = Object.assign(
+            result.paths[state.currentUri]["request"] || {},
+            {
+              body: bodyDetail,
+            }
+          );
         }
 
-        if(state.isResponse){
-          result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"] = {
-            ...result.paths[state.currentUri]["response"][state.currentHttpStatus]["request"],
-            body: bodyDetail
-          }
+        if (state.isResponse) {
+          result.paths[state.currentUri]["response"][state.currentHttpStatus][
+            "request"
+          ] = {
+            ...result.paths[state.currentUri]["response"][
+              state.currentHttpStatus
+            ]["request"],
+            body: bodyDetail,
+          };
         }
-    }],
-    ["http status",(key,element) => {
-        state.currentHttpStatus = element.value
+      },
+    ],
+    [
+      "http status",
+      (key, element) => {
+        state.currentHttpStatus = element.value;
         result.paths[state.currentUri]["response"] = {
-            ...result.paths[state.currentUri]["response"],
-            [element.value]: {}         
-        }
-    }]
+          ...result.paths[state.currentUri]["response"],
+          [element.value]: {},
+        };
+      },
+    ],
   ]);
 
   sheetData.forEach((element) => {
     const action = actions.get(element.key);
     if (action) {
-      action(element.key, element);
+      action(element.key.toLowerCase(), element);
     }
   });
-
+ 
   return result;
 }
 

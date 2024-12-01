@@ -4,8 +4,9 @@ const YAML = require("json-to-pretty-yaml");
 const multer = require("multer");
 const memoryStorage = multer.memoryStorage();
 const upload = multer({ storage: memoryStorage });
-const XLSX = require("xlsx");
+
 const { Readable } = require("stream");
+const Func = require("../public/function/func")
 const {
     ReadInit,
     ReplaceData,
@@ -46,25 +47,20 @@ router.post("/excel", upload.single("file"), async (req, res) => {
     }
 
     const filePath = req.file.buffer;
-    const workbook = XLSX.read(filePath);
-    const sheetName = workbook.SheetNames[1];
-    
-    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    const metaSheet = sheetName.split('-');
-    
   
-    const transformedData = TransformSheetData(metaSheet,sheetData);
-
+    const transformedData = await Func.loopSheets(filePath)
+   
     const fileData = await ReadInit();
-    const { yamlData, fileName } = ReplaceData(fileData, {
-        body: transformedData
+
+    const yamlData  = await ReplaceData(fileData, {
+      body: transformedData,
     });
-    const afterV1 = fileName.split("/v1/")[1] || "default";
-    const fileNameWithExt = `${afterV1}.yaml`;
+    // const afterV1 = fileName.split("/v1/")[1] || "default";
+    // const fileNameWithExt = `${afterV1}.yaml`;
 
     res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${fileNameWithExt}"`
+        `attachment; filename="test"`
     );
     res.setHeader("Content-Type", "application/x-yaml");
 
