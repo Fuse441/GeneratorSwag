@@ -167,7 +167,7 @@ async function ReplaceData(content, request) {
     }
   }
     
-  console.log("==>" ,obj)
+
   return obj
   }
   
@@ -175,7 +175,7 @@ async function ReplaceData(content, request) {
 
  const result = await Promise.all(mapYAML)
  
-return  YAML.stringify(result)
+return  result
 }
 
 
@@ -184,169 +184,8 @@ return  YAML.stringify(result)
  
   
   
-  // }
   
 
-  // const obj = JSON.parse(JSON.stringify(content));
-  // let fileName = "";
-  // obj.info.title = element.title;
-  // obj.info.version = requests.body.version;
-  // obj.info.description = requests.body.description;
-  // obj.info.contact = requests.body.contact;
-
-  // obj.servers = requests.body.servers.map((item) => ({ url: item }));
-
-  // obj.paths = {};
-  // for (const key in requests.body.paths) {
-  //   fileName = key;
-  //   const method = requests.body.paths[key].method
-  //     .toLowerCase()
-  //     .replace(/['"]+/g, "");
-  //   obj.paths[key] = {
-  //     [method]: {
-  //       tags: [],
-  //       requestBody: {
-  //         content: {
-  //           "application/json": {
-  //             schema: {
-  //               type: "object",
-  //               properties: {},
-  //               required: [],
-  //             },
-  //             example: {},
-  //           },
-  //         },
-  //       },
-  //       parameters: [],
-  //       responses: {},
-  //     },
-  //   };
-  //   obj.paths[key][method].tags = requests.body.paths[key].tags;
-
-  //   for (const item in requests.body.paths[key].request.header) {
-  //     const objectParamerter = {
-  //       in: "header",
-  //       name: Func.cutStarFormString(item),
-  //       schema: {
-  //         type: typeof item,
-  //       },
-  //       required: Func.checkRequest(item),
-  //       description: Func.cutStarFormString(item),
-  //     };
-  //     obj.paths[key][method].parameters.push(objectParamerter);
-  //   }
-
-  //   for (const item in requests.body.paths[key].request.body) {
-  //     let newItem;
-  //     item.includes("*")
-  //       ? (newItem = item.replace(/\*/g, ""))
-  //       : (newItem = item);
-
-  //     const value = requests.body.paths[key].request.body[item];
-  //     // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
-
-  //     if (Func.checkRequest(item))
-  //       obj.paths[key][method].requestBody.content[
-  //         "application/json"
-  //       ].schema.required.push(newItem);
-
-  //     obj.paths[key][method].requestBody.content[
-  //       "application/json"
-  //     ].schema.properties[newItem] = Func.nestObject(value);
-  //     obj.paths[key][method].requestBody.content["application/json"].example[
-  //       newItem
-  //     ] = Func.cutStarFromObject(value);
-  //   }
-  //   if (
-  //     obj.paths[key][method].requestBody.content["application/json"].schema
-  //       .required.length == 0
-  //   ) {
-  //     delete obj.paths[key][method].requestBody.content["application/json"]
-  //       .schema.required;
-  //   }
-
-  //   for (const item in requests.body.paths[key].response) {
-  //     const responseData = {
-  //       description: requests.body.paths[key].response[item].description,
-  //       headers: {},
-
-  //       content: {
-  //         "application/json": {
-  //           schema: {
-  //             type: "object",
-  //             properties: {},
-  //             required: [],
-  //           },
-  //           example: {},
-  //         },
-  //       },
-  //     };
-
-  //     const res = requests.body.paths[key].response[item];
-
-  //     for (const key in res.request.header) {
-  //       const value = res.request.header[key];
-  //       const objectHeader = {
-  //         description: Func.cutStarFormString(key),
-  //         required: Func.checkRequest(key),
-  //         schema: {
-  //           type: typeof value,
-  //           example: value,
-  //         },
-  //       };
-  //       responseData.headers[Func.cutStarFormString(key)] = objectHeader;
-  //     }
-
-  //     if (Object.keys(res.request.body).length != 0) {
-  //       for (const key in res.request.body) {
-  //         const value = res.request.body[key];
-
-  //         if (Func.checkRequest(key)) {
-  //           responseData.content["application/json"].schema.required.push(
-  //             Func.cutStarFromObject(key)
-  //           );
-  //         }
-  //         responseData.content["application/json"].example[
-  //           Func.cutStarFormString(key)
-  //         ] = Func.cutStarFromObject(value);
-  //         responseData.content["application/json"].schema.properties[
-  //           Func.cutStarFormString(key)
-  //         ] = Func.nestObject(value);
-  //       }
-  //     } 
-  //     if(responseData.content["application/json"].schema.required.length == 0)
-  //       delete responseData.content["application/json"].schema.required
-
-
-     
-  //     try {
-  //       obj.paths[key][method].responses[item] = responseData;
-  //     } catch (error) {
-  //       console.log("catch : ", error);
-  //     }
-  //   }
- 
-  // }
-
-  // const yamlData = YAML.stringify(obj);
-  // return { yamlData, fileName };
-
-
-function CreateFileYAML(content, fileName) {
-  try {
-    if (!content) {
-      console.error("No content provided to CreateFileYAML");
-      return;
-    }
-    const afterV1 = fileName.split("/v1/")[1];
-
-    fs.writeFileSync(`swaggers/files/${afterV1}.yaml`, content);
-
-  } catch (err) {
-    console.error("Error writing file:", err);
-    throw err;
-  }
-}
 
 function TransformSheetData(metaSheet, sheetData) {
   const [title, version] = metaSheet;
@@ -518,7 +357,6 @@ function TransformSheetData(metaSheet, sheetData) {
 
 module.exports = {
   ReadInit,
-  CreateFileYAML,
   ReplaceData,
   TransformSheetData,
 };

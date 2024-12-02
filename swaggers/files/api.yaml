@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 info:
   title: "api01"
-  version: "1.0.0"
+  version: "1.0.1"
   description: "hahahah"
   contact:
     name: "T3"
@@ -11,7 +11,7 @@ servers:
   - url: "https://google.com"
 paths:
   /api/v1:
-    get:
+    post:
       tags:
         - "API TEST1"
       requestBody:
@@ -26,7 +26,7 @@ paths:
           name: "key"
           schema:
             type: "string"
-          required: false
+          required: true
           description: "key"
       responses:
         200:

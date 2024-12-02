@@ -4,15 +4,14 @@ const YAML = require("json-to-pretty-yaml");
 const multer = require("multer");
 const memoryStorage = multer.memoryStorage();
 const upload = multer({ storage: memoryStorage });
-
 const { Readable } = require("stream");
 const Func = require("../public/function/func")
 const {
     ReadInit,
     ReplaceData,
-    TransformSheetData
+    TransformSheetData,
+    CreateFileYAML
 } = require("../public/function/main");
-
 // Route for JSON to YAML
 router.post("/", async (req, res) => {
     try {
@@ -42,29 +41,45 @@ router.post("/", async (req, res) => {
 
 // Route for Excel to YAML
 router.post("/excel", upload.single("file"), async (req, res) => {
+
     if (!req.file) {
-        return res.status(400).send("No file uploaded.");
+      return res.status(400).send("No file uploaded.");
     }
-
-    const filePath = req.file.buffer;
   
-    const transformedData = await Func.loopSheets(filePath)
-   
-    const fileData = await ReadInit();
-
-    const yamlData  = await ReplaceData(fileData, {
-      body: transformedData,
-    });
-    // const afterV1 = fileName.split("/v1/")[1] || "default";
-    // const fileNameWithExt = `${afterV1}.yaml`;
-
-    res.setHeader(
+    try {
+      const filePath = req.file.buffer;
+  
+      // ประมวลผลข้อมูล
+      const transformedData = await Func.loopSheets(filePath);
+      const fileData = await ReadInit();
+  
+      const yamlData = await ReplaceData(fileData, {
+        body: transformedData,
+      });
+  
+    
+      await Func.CreateFileYAML(yamlData);
+  
+  
+      const zipFilePath = await Func.CreateFileZIP();
+  
+      res.setHeader(
         "Content-Disposition",
-        `attachment; filename="test"`
-    );
-    res.setHeader("Content-Type", "application/x-yaml");
-
-    res.send(yamlData).end();
-});
-
+        `attachment; filename="example.zip"`
+      );
+      res.setHeader("Content-Type", "application/zip");
+      
+      res.sendFile(zipFilePath, (err) => {
+       
+        if (err) {
+          console.error("Error sending file:", err);
+          res.status(500).send("Error sending file.");
+        }
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("An error occurred.");
+    }
+  });
+  
 module.exports = router;

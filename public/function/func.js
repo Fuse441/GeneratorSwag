@@ -4,6 +4,10 @@ const { ReadInit,
   ReplaceData,
   TransformSheetData
 } = require("../function/main");
+const fs = require("fs");
+const YAML = require("json-to-pretty-yaml");
+const archiver = require("archiver");
+const path = require("path");
 module.exports.checkRequest = function (key) {
     if (typeof key == "string" && key.includes('*')) {
         return true
@@ -120,5 +124,74 @@ module.exports.loopSheets = async function (filePath) {
   const results = await Promise.all(resultPromises);
 
   return results;
+};
+
+module.exports.CreateFileYAML =  async function(content) {
+
+  if (!content || !Array.isArray(content)) {
+    console.error("No valid content provided to CreateFileYAML");
+    return;
+  }
+
+  const temp = content.map(item => Object.keys(item.paths)[0]);
+  const fileNames = temp.map(item => item.split("/v1")[0])
+  
+
+
+    content.forEach((element,index) => {
+        const yamlString = YAML.stringify(element);    
+
+        try {
+          fs.writeFileSync(`swaggers/files/${fileNames[index]}.yaml`, yamlString);
+    
+        } catch (err) {
+          console.error("Error writing file:", err);
+          throw err;
+        }
+      });
+
+}
+
+
+module.exports.CreateFileZIP = async function () {
+  const dirFile = `${path.resolve(__dirname, "..", "..")}/swaggers/files`;
+  const outputFilePath = `${dirFile}/example.zip`;
+
+ 
+  if (!fs.existsSync(dirFile)) {
+    throw new Error(`Directory not found: ${dirFile}`);
+  }
+
+
+  const output = fs.createWriteStream(outputFilePath);
+  const archive = archiver("zip", {
+    zlib: { level: 9 }, 
+  });
+
+  return new Promise((resolve, reject) => {
+    output.on("close", () => {
+      console.log(`ZIP file created: ${outputFilePath}`);
+      resolve(outputFilePath);
+    });
+
+    archive.on("error", (err) => {
+      reject(err);
+    });
+
+    archive.pipe(output);
+
+    try {
+    
+      const filePath = `${dirFile}/api1.yaml`; 
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
+      }
+      archive.append(fs.createReadStream(filePath), { name: "file1.yaml" });
+
+      archive.finalize();
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
