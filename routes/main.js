@@ -12,6 +12,7 @@ const {
     TransformSheetData,
     CreateFileYAML
 } = require("../public/function/main");
+const yaml = require("js-yaml");
 // Route for JSON to YAML
 router.post("/", async (req, res) => {
     try {
@@ -48,9 +49,9 @@ router.post("/excel", upload.single("file"), async (req, res) => {
   
     try {
       const filePath = req.file.buffer;
-  
-      // ประมวลผลข้อมูล
+
       const transformedData = await Func.loopSheets(filePath);
+      console.log(JSON.stringify(transformedData[0]))
       const fileData = await ReadInit();
   
       const yamlData = await ReplaceData(fileData, {
@@ -81,5 +82,35 @@ router.post("/excel", upload.single("file"), async (req, res) => {
       res.status(500).send("An error occurred.");
     }
   });
+
+  router.post("/js-yaml", (req, res) => {
+    try {
+      // console.log("Received Body:", req.body); // ตรวจสอบว่าได้รับข้อมูลหรือไม่
+      
+      // แปลง YAML เป็น JSON
+      const yamlData = req.body;
+      const jsonData = yaml.load(yamlData);
+      // console.log("Converted JSON:", jsonData);
+
+     
+      res.json(jsonData);
+  } catch (error) {
+      console.error("Error parsing YAML:", error);
+      res.status(400).send({ error: "Invalid YAML format." });
+  }
+});
+
+
+router.get("/swaggerUI", (req, res) => {
+  try {
   
+    const yamlData = req.query.yaml;  
+   
+    res.json(JSON.parse(yamlData));
+  } catch (error) {
+    console.error("Error parsing YAML:", error);
+    res.status(400).send({ error: "Invalid YAML format." });
+  }
+});
+
 module.exports = router;

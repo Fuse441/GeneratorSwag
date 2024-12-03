@@ -76,6 +76,7 @@ async function ReplaceData(content, request) {
       };
       obj.paths[key][method].parameters.push(objectParamerter);
     }
+    
        for (const item in element.paths[key].request.body) {
       let newItem;
       item.includes("*")
@@ -313,6 +314,7 @@ function TransformSheetData(metaSheet, sheetData) {
           item: parsedValue,
         };
         if (state.isRequest) {
+          console.log("=====>",element.value)
           result.paths[state.currentUri]["request"] = Object.assign(
             result.paths[state.currentUri]["request"] || {},
             {

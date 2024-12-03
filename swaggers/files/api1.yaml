@@ -19,8 +19,15 @@ paths:
           application/json:
             schema:
               type: "object"
-              properties: {}
-            example: {}
+              properties:
+                item:
+                  type: "object"
+                  properties:
+                    key:
+                      type: "string"
+            example:
+              item:
+                key: "value"
       parameters:
         - in: "header"
           name: "key"
