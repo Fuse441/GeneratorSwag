@@ -17,7 +17,8 @@ const {
 router.post("/", async (req, res) => {
     try {
         const fileData = await ReadInit();
-        const { yamlData, fileName } = ReplaceData(fileData, req);
+        const yamlData = ReplaceData(fileData, req);
+        const { prettierYaml, fileName } = YAML.stringify(yamlData);
         const afterV1 = fileName.split("/v1/")[1] || "default";
         const fileNameWithExt = `${afterV1}.yaml`;
 
@@ -28,7 +29,7 @@ router.post("/", async (req, res) => {
         res.setHeader("Content-Type", "application/x-yaml");
 
         const stream = new Readable();
-        stream.push(yamlData);
+        stream.push(prettierYaml);
         stream.push(null);
 
         stream.pipe(res);
@@ -62,9 +63,11 @@ router.post("/excel", upload.single("file"), async (req, res) => {
         "Content-Disposition",
         `attachment; filename="test"`
     );
-    res.setHeader("Content-Type", "application/x-yaml");
+    res.setHeader("Content-Type", "application/zip");
 
-    res.send(yamlData).end();
+    //TODO:
+    const archived = await Func.LoopZipFile(yamlData, res)
+    res.end()
 });
 
 module.exports = router;

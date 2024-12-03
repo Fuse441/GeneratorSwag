@@ -1,5 +1,7 @@
 const e = require("express");
 const XLSX = require("xlsx");
+const archiver = require("archiver");
+const YAML = require("json-to-pretty-yaml");
 const { ReadInit,
   ReplaceData,
   TransformSheetData
@@ -122,3 +124,20 @@ module.exports.loopSheets = async function (filePath) {
   return results;
 };
 
+module.exports.LoopZipFile = async function (files=[], res){
+   const archive = archiver('zip', {
+     zlib: { level: 9 }
+   });
+
+    if(!!res){
+      archive.pipe(res);
+    }
+
+   for (const context of files) {
+        const fileName = `${context?.info?.title}-${context?.info?.version}`;
+        const yamlData = YAML.stringify(context);
+
+        archive.append( yamlData , { name: `${fileName}.yaml` });
+   }
+   await archive.finalize()
+}

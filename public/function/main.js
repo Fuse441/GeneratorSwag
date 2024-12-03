@@ -175,7 +175,7 @@ async function ReplaceData(content, request) {
 
  const result = await Promise.all(mapYAML)
  
-return  YAML.stringify(result)
+return  result
 }
 
 
