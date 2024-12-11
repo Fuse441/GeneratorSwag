@@ -134,8 +134,8 @@ module.exports.CreateFileYAML =  async function(content) {
   }
 
   const temp = content.map(item => Object.keys(item.paths)[0]);
-  const fileNames = temp.map(item => item.split("/v1")[0])
-  
+  const fileNames = temp.map(item => item.split("/v1")[1])
+  const files = []
 
 
     content.forEach((element,index) => {
@@ -143,17 +143,17 @@ module.exports.CreateFileYAML =  async function(content) {
 
         try {
           fs.writeFileSync(`swaggers/files/${fileNames[index]}.yaml`, yamlString);
-    
+          files.push(fileNames[index])
         } catch (err) {
           console.error("Error writing file:", err);
           throw err;
         }
       });
-
+      return files
 }
 
 
-module.exports.CreateFileZIP = async function () {
+module.exports.CreateFileZIP = async function (files) {
   const dirFile = `${path.resolve(__dirname, "..", "..")}/swaggers/files`;
   const outputFilePath = `${dirFile}/example.zip`;
 
@@ -181,12 +181,13 @@ module.exports.CreateFileZIP = async function () {
     archive.pipe(output);
 
     try {
-    
-      const filePath = `${dirFile}/api1.yaml`; 
+      
+      const filePath = `${dirFile}/${files[0]}.yaml`; 
       if (!fs.existsSync(filePath)) {
         throw new Error(`File not found: ${filePath}`);
       }
-      archive.append(fs.createReadStream(filePath), { name: "file1.yaml" });
+      
+      archive.append(fs.createReadStream(filePath), { name: `${files[0]}.yaml` });
 
       archive.finalize();
     } catch (error) {

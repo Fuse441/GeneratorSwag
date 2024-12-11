@@ -51,7 +51,7 @@ router.post("/excel", upload.single("file"), async (req, res) => {
       const filePath = req.file.buffer;
 
       const transformedData = await Func.loopSheets(filePath);
-      console.log(JSON.stringify(transformedData[0]))
+      // console.log(JSON.stringify(transformedData[0]))
       const fileData = await ReadInit();
   
       const yamlData = await ReplaceData(fileData, {
@@ -59,10 +59,10 @@ router.post("/excel", upload.single("file"), async (req, res) => {
       });
   
     
-      await Func.CreateFileYAML(yamlData);
+      const files = await Func.CreateFileYAML(yamlData);
+      console.log("log files",files)
   
-  
-      const zipFilePath = await Func.CreateFileZIP();
+      const zipFilePath = await Func.CreateFileZIP(files);
   
       res.setHeader(
         "Content-Disposition",
@@ -85,12 +85,9 @@ router.post("/excel", upload.single("file"), async (req, res) => {
 
   router.post("/js-yaml", (req, res) => {
     try {
-      // console.log("Received Body:", req.body); // ตรวจสอบว่าได้รับข้อมูลหรือไม่
-      
-      // แปลง YAML เป็น JSON
+  
       const yamlData = req.body;
       const jsonData = yaml.load(yamlData);
-      // console.log("Converted JSON:", jsonData);
 
      
       res.json(jsonData);
@@ -103,9 +100,13 @@ router.post("/excel", upload.single("file"), async (req, res) => {
 
 router.get("/swaggerUI", (req, res) => {
   try {
-  
+    console.log("in route UI")
     const yamlData = req.query.yaml;  
-   
+    console.log("log yaml ==>",yamlData)
+    if(yamlData)
+    console.log("💀 log yaml ==> ",JSON.stringify(yamlData))
+  else
+    console.log("fail load YAML  ==>",yamlData)
     res.json(JSON.parse(yamlData));
   } catch (error) {
     console.error("Error parsing YAML:", error);

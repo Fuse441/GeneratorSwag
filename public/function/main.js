@@ -34,6 +34,7 @@ async function ReplaceData(content, request) {
   obj.info.title = element.title;
   obj.info.version = element.version;
   obj.info.description = element.description;
+  
   obj.info.contact = element.contact;
   obj.servers = element.servers.map((item) => ({ url: item }));
   obj.paths = {};
@@ -310,9 +311,7 @@ function TransformSheetData(metaSheet, sheetData) {
       "body",
       (key, element) => {
         const parsedValue = JSON.parse(element.value);
-        const bodyDetail = {
-          item: parsedValue,
-        };
+        const bodyDetail =  parsedValue;
         if (state.isRequest) {
           console.log("=====>",element.value)
           result.paths[state.currentUri]["request"] = Object.assign(
