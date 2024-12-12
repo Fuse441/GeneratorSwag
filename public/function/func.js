@@ -107,24 +107,31 @@ module.exports.loopSheets = async function (filePath) {
   const workbook = XLSX.read(filePath);
   const sheetArray = workbook.SheetNames;
 
-
-  const resultPromises = sheetArray.map(async (sheetName, index) => {
+  const resultPromises = sheetArray.map(async (sheetName) => {
     console.log(sheetName);
 
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     const metaSheet = sheetName.split("-");
 
     const transformedData = TransformSheetData(metaSheet, sheetData);
-    // console.log("check : ",transformedData)
- 
+   
 
-    return transformedData; 
+    return transformedData;
   });
 
-  const results = await Promise.all(resultPromises);
+  try {
+    const results = await Promise.all(resultPromises);
 
-  return results;
+    return {
+      results,
+      sheetNames: sheetArray, 
+    };
+  } catch (error) {
+    console.error("Error processing sheets:", error);
+    throw error; 
+  }
 };
+
 
 module.exports.CreateFileYAML =  async function(content) {
 
@@ -153,24 +160,43 @@ module.exports.CreateFileYAML =  async function(content) {
 }
 
 
-module.exports.CreateFileZIP = async function (files) {
+module.exports.CreateFileZIP = async function (files,fileZipName) {
   const dirFile = `${path.resolve(__dirname, "..", "..")}/swaggers/files`;
-  const outputFilePath = `${dirFile}/example.zip`;
+  const outputFilePath = `${dirFile}/${fileZipName}.zip`;
 
- 
   if (!fs.existsSync(dirFile)) {
     throw new Error(`Directory not found: ${dirFile}`);
   }
 
-
   const output = fs.createWriteStream(outputFilePath);
   const archive = archiver("zip", {
-    zlib: { level: 9 }, 
+    zlib: { level: 9 },
   });
 
   return new Promise((resolve, reject) => {
     output.on("close", () => {
       console.log(`ZIP file created: ${outputFilePath}`);
+      
+      // ลบไฟล์ทั้งหมดใน dirFile
+      fs.readdir(dirFile, (err, files) => {
+        if (err) {
+          console.error(`Error reading directory: ${err.message}`);
+        } else {
+          files.forEach((file) => {
+            const filePath = `${dirFile}/${file}`;
+            if (!file.includes("zip")) { 
+              fs.unlink(filePath, (unlinkErr) => {
+                if (unlinkErr) {
+                  console.error(`Error deleting file: ${filePath}, ${unlinkErr.message}`);
+                } else {
+                  console.log(`Deleted file: ${filePath}`);
+                }
+              });
+            }
+          });
+        }
+      });
+
       resolve(outputFilePath);
     });
 
@@ -181,18 +207,17 @@ module.exports.CreateFileZIP = async function (files) {
     archive.pipe(output);
 
     try {
-      
-      const filePath = `${dirFile}/${files[0]}.yaml`; 
+      const filePath = `${dirFile}/${files[0]}.yaml`;
       if (!fs.existsSync(filePath)) {
         throw new Error(`File not found: ${filePath}`);
       }
-      
-      archive.append(fs.createReadStream(filePath), { name: `${files[0]}.yaml` });
 
+      archive.append(fs.createReadStream(filePath), { name: `${files[0]}.yaml` });
       archive.finalize();
     } catch (error) {
       reject(error);
     }
   });
 };
+
 

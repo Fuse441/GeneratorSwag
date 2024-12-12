@@ -50,23 +50,24 @@ router.post("/excel", upload.single("file"), async (req, res) => {
     try {
       const filePath = req.file.buffer;
 
-      const transformedData = await Func.loopSheets(filePath);
+      const {results,sheetNames } = await Func.loopSheets(filePath);
+      // console.log("sheetNames =>",results)
       // console.log(JSON.stringify(transformedData[0]))
       const fileData = await ReadInit();
   
       const yamlData = await ReplaceData(fileData, {
-        body: transformedData,
+        body: results,
       });
   
     
       const files = await Func.CreateFileYAML(yamlData);
       console.log("log files",files)
   
-      const zipFilePath = await Func.CreateFileZIP(files);
+      const zipFilePath = await Func.CreateFileZIP(files,sheetNames);
   
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="example.zip"`
+        `attachment; filename="${sheetNames[0]}.zip"`
       );
       res.setHeader("Content-Type", "application/zip");
       
