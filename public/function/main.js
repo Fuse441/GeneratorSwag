@@ -190,170 +190,169 @@ return  result
 
 
 function TransformSheetData(metaSheet, sheetData) {
-  const [title, version] = metaSheet;
-  const result = {
-    title: title,
-    version: version,
-    tags : [],
-    description: "",
-    contact: "",
-    servers: [],
-    paths: {
-    
-    },
-  };
+    try {
+      const [title, version] = metaSheet;
+      const result = {
+        title: title,
+        version: version,
+        tags : [],
+        description: "",
+        contact: "",
+        servers: [],
+        paths: {
+        },
+      };
 
-  const state = {
-    currentUri: null,
-    currentMethod: null,
-    currentHttpStatus: null,
-    isRequest: false,
-    isResponse: false,
-  };
-  const actions = new Map([
-    [
-      "tag",
-      (key, element) => {
-        result.tags.push( element.value)
-      },
-    ],
-    [
-      "description",
-      (key, element) => {
-        const description = element.value;
-        if (!state.isResponse) {
-          result.description = description;
-        } else {
-          result.paths[state.currentUri]["response"][state.currentHttpStatus][
-            "description"
-          ] = description;
-        }
-      },
-    ],
-    [
-      "reference",
-      (key, element) =>
-        (result.contact = {
-          name: element.value.split("@")[0],
-          url: element.value.split("@")[1],
-        }),
-    ],
-    [
-      "servers",
-      (key, element) => {
-      
-        const parts = element.value.split(/\r\n|\n/);
-     
-        const newArray = parts.map((item) => item.replace("@", ""));
-        result.servers.push(...newArray);
-     
-      },
-    ],
-    [
-      "uri",
-      (key, element) => {
-        result.paths[element.value] = {};
-        state.currentUri = element.value;
-      },
-    ],
-    [
-      "method",
-      (key, element) => {
-        Object.assign(result.paths[state.currentUri], {
-          method: element.value,
-          tags : result.tags
-        });
-        delete result.tags
-        state.currentMethod = element.value;
-      },
-    ],
-    [
-      "Request",
-      (key, element) => {
-        state.isRequest = true;
-        state.isResponse = false;
-      },
-    ],
-    [
-      "Response",
-      (key, element) => {
-        state.isResponse = true;
-        state.isRequest = false;
-      },
-    ],
-    [
-      "header",
-      (key, element) => {
-        const parsedValue = JSON.parse(element.value);
-
-        if (state.isRequest) {
-          result.paths[state.currentUri]["request"] = Object.assign(
-            result.paths[state.currentUri]["request"] || {},
-            {
-              header: parsedValue,
+      const state = {
+        currentUri: null,
+        currentMethod: null,
+        currentHttpStatus: null,
+        isRequest: false,
+        isResponse: false,
+      };
+      const actions = new Map([
+        [
+          "tag",
+          (key, element) => {
+            result.tags.push(element.value)
+          },
+        ],
+        [
+          "description",
+          (key, element) => {
+            const description = element.value;
+            if (!state.isResponse) {
+              result.description = description;
+            } else {
+              result.paths[state.currentUri]["response"][state.currentHttpStatus][
+                "description"
+              ] = description;
             }
-          );
-        }
-
-        if (state.isResponse) {
-          result.paths[state.currentUri]["response"][state.currentHttpStatus][
-            "request"
-          ] = {
-            ...result.paths[state.currentUri]["response"][
-              state.currentHttpStatus
-            ]["request"],
-            header: parsedValue,
-          };
-        }
-      },
-    ],
-    [
-      "body",
-      (key, element) => {
-        const parsedValue = JSON.parse(element.value);
-        const bodyDetail =  parsedValue;
-        if (state.isRequest) {
-          console.log("=====>",element.value)
-          result.paths[state.currentUri]["request"] = Object.assign(
-            result.paths[state.currentUri]["request"] || {},
-            {
-              body: bodyDetail,
+          },
+        ],
+        [
+          "reference",
+          (key, element) =>
+            (result.contact = {
+              name: element.value.split("@")[0],
+              url: element.value.split("@")[1],
+            }),
+        ],
+        [
+          "servers",
+          (key, element) => {
+            const parts = element.value.split(/\r\n|\n/);
+            const newArray = parts.map((item) => item.replace("@", ""));
+            result.servers.push(...newArray);
+          },
+        ],
+        [
+          "uri",
+          (key, element) => {
+            result.paths[element.value] = {};
+            state.currentUri = element.value;
+          },
+        ],
+        [
+          "method",
+          (key, element) => {
+            Object.assign(result.paths[state.currentUri], {
+              method: element.value,
+              tags : result.tags
+            });
+            delete result.tags
+            state.currentMethod = element.value;
+          },
+        ],
+        [
+          "Request",
+          (key, element) => {
+            state.isRequest = true;
+            state.isResponse = false;
+          },
+        ],
+        [
+          "Response",
+          (key, element) => {
+            state.isResponse = true;
+            state.isRequest = false;
+          },
+        ],
+        [
+          "header",
+          (key, element) => {
+            const parsedValue = !!element?.value ? JSON.parse(element.value) : {};
+            if (state.isRequest) {
+              result.paths[state.currentUri]["request"] = Object.assign(
+                result.paths[state.currentUri]["request"] || {},
+                {
+                  header: parsedValue,
+                }
+              );
             }
-          );
-        }
 
-        if (state.isResponse) {
-          result.paths[state.currentUri]["response"][state.currentHttpStatus][
-            "request"
-          ] = {
-            ...result.paths[state.currentUri]["response"][
-              state.currentHttpStatus
-            ]["request"],
-            body: bodyDetail,
-          };
-        }
-      },
-    ],
-    [
-      "http status",
-      (key, element) => {
-        state.currentHttpStatus = element.value;
-        result.paths[state.currentUri]["response"] = {
-          ...result.paths[state.currentUri]["response"],
-          [element.value]: {},
-        };
-      },
-    ],
-  ]);
+            if (state.isResponse) {
+              result.paths[state.currentUri]["response"][state.currentHttpStatus][
+                "request"
+              ] = {
+                ...result.paths[state.currentUri]["response"][
+                  state.currentHttpStatus
+                ]["request"],
+                header: parsedValue,
+              };
+            }
+          },
+        ],
+        [
+          "body",
+          (key, element) => {
+            const parsedValue = !!element?.value ? JSON.parse(element?.value) : {};
+            const bodyDetail =  parsedValue;
+            if (state.isRequest && state.currentMethod != "GET") {
+              result.paths[state.currentUri]["request"] = Object.assign(
+                result.paths[state.currentUri]["request"] || {},
+                {
+                  body: bodyDetail,
+                }
+              );
+            }
 
-  sheetData.forEach((element) => {
-    const action = actions.get(element.key);
-    if (action) {
-      action(element.key.toLowerCase(), element);
+            if (state.isResponse) {
+              result.paths[state.currentUri]["response"][state.currentHttpStatus][
+                "request"
+              ] = {
+                ...result.paths[state.currentUri]["response"][
+                  state.currentHttpStatus
+                ]["request"],
+                body: bodyDetail,
+              };
+            }
+          },
+        ],
+        [
+          "http status",
+          (key, element) => {
+            state.currentHttpStatus = element.value;
+            result.paths[state.currentUri]["response"] = {
+              ...result.paths[state.currentUri]["response"],
+              [element.value]: {},
+            };
+          },
+        ],
+      ]);
+
+      sheetData.forEach((element) => {
+        const action = actions.get(element.key);
+        if (action) {
+          action(element.key.toLowerCase(), element);
+        }
+      });
+     
+      return result;
+    } catch (error) {
+      console.error("Error transforming sheet data:", error);
+      throw new Error("Error transforming sheet data.");
     }
-  });
- 
-  return result;
 }
 
 module.exports = {
