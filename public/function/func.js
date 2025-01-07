@@ -134,7 +134,7 @@ module.exports.LoopZipFile = async function (files=[], res){
     }
 
    for (const context of files) {
-        const fileName = `${context?.info?.title}-${context?.info?.version}`;
+        const fileName = `${context?.info?.title}`;
         const yamlData = YAML.stringify(context);
 
         archive.append( yamlData , { name: `${fileName}.yaml` });

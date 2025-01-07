@@ -4,7 +4,7 @@ const YAML = require("json-to-pretty-yaml");
 const multer = require("multer");
 const memoryStorage = multer.memoryStorage();
 const upload = multer({ storage: memoryStorage });
-
+const path = require('path')
 const { Readable } = require("stream");
 const Func = require("../public/function/func")
 const {
@@ -41,7 +41,15 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Route for Excel to YAML
+router.get('/swaggerUI', (req, res) => {
+  const filePath = path.join(__dirname, '../swaggers/html/main.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Failed to load Swagger UI');
+    }
+  });
+});
 router.post("/excel", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).send("No file uploaded.");
@@ -61,7 +69,7 @@ router.post("/excel", upload.single("file"), async (req, res) => {
 
     res.setHeader(
         "Content-Disposition",
-        `attachment; filename="test"`
+        `attachment; filename="SwaggerFile"`
     );
     res.setHeader("Content-Type", "application/zip");
 
