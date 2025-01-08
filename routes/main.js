@@ -7,6 +7,7 @@ const upload = multer({ storage: memoryStorage });
 const path = require('path')
 const { Readable } = require("stream");
 const Func = require("../public/function/func")
+
 const {
     ReadInit,
     ReplaceData,
@@ -34,7 +35,7 @@ router.post("/", async (req, res) => {
 
         stream.pipe(res);
     } catch (error) {
-        console.error("Error processing file:", error);
+        // console.error("Error processing file:", error);
         res
             .status(500)
             .send({ message: "Error reading file", error: error.message });
@@ -45,7 +46,7 @@ router.get('/swaggerUI', (req, res) => {
   const filePath = path.join(__dirname, '../swaggers/html/main.html');
   res.sendFile(filePath, (err) => {
     if (err) {
-      console.error(err);
+      // console.error(err);
       res.status(500).send('Failed to load Swagger UI');
     }
   });
@@ -64,13 +65,12 @@ router.post("/excel", upload.single("file"), async (req, res) => {
     const yamlData  = await ReplaceData(fileData, {
       body: transformedData,
     });
+    
+    // console.log("log check yaml data",(util.inspect(yamlData, {showHidden: false, depth: null, colors: true})))
     // const afterV1 = fileName.split("/v1/")[1] || "default";
     // const fileNameWithExt = `${afterV1}.yaml`;
 
-    res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="SwaggerFile"`
-    );
+    res.setHeader("Content-Disposition", 'attachment; filename="SwaggerFile.zip"');
     res.setHeader("Content-Type", "application/zip");
 
     //TODO:

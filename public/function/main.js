@@ -74,16 +74,19 @@ async function ReplaceData(content, request) {
         };
         obj.paths[key][method].parameters.push(objectParamerter);
       }
+      //console.log("log check ==>" ,element.paths[key].request.body)
       for (const item in element.paths[key].request.body) {
+        
         let newItem;
         item.includes("*")
           ? (newItem = item.replace(/\*/g, ""))
           : (newItem = item);
 
         const value = element.paths[key].request.body[item];
+        console.log("log check value req : ",value)
         // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
 
-        if (Func.checkRequest(item))
+        if (Func.cutStarFromObject(item))
           obj.paths[key][method].requestBody.content[
             "application/json"
           ].schema.required.push(newItem);
@@ -121,7 +124,7 @@ async function ReplaceData(content, request) {
         };
 
         const res = element.paths[key].response[item];
-
+        //console.log("check res ==> ",res)
         for (const key in res.request.header) {
           const value = res.request.header[key];
           const objectHeader = {
@@ -134,8 +137,9 @@ async function ReplaceData(content, request) {
           };
           responseData.headers[Func.cutStarFormString(key)] = objectHeader;
         }
-
-        if (Object.keys(res.request.body).length != 0) {
+        //console.log("check log body : ",res.request.body)
+        res.request.body == undefined && (res.request.body = {})
+        if (Object.keys(res.request.body).length != 0 && res.request.body != undefined) {
           for (const key in res.request.body) {
             const value = res.request.body[key];
 
@@ -153,7 +157,7 @@ async function ReplaceData(content, request) {
           }
         }
 
-        responseData.content["application/json"].schema.required.length == 0 &&
+        (responseData.content["application/json"].schema.required.length == 0 || res.request.body == undefined) &&
           delete responseData.content["application/json"].schema.required;
 
         method === "get" &&
@@ -162,15 +166,15 @@ async function ReplaceData(content, request) {
         try {
           obj.paths[key][method].responses[item] = responseData;
         } catch (error) {
-          console.log("catch : ", error);
+          // console.log("catch : ", error);
         }
       }
     }
 
-    console.log(
-      "==>",
-      util.inspect(obj, { showHidden: false, depth: null, colors: true })
-    );
+    // console.log(
+    //   "==>",
+    //   util.inspect(obj, { showHidden: false, depth: null, colors: true })
+    // );
     return obj;
   });
 
@@ -182,7 +186,7 @@ async function ReplaceData(content, request) {
 function CreateFileYAML(content, fileName) {
   try {
     if (!content) {
-      console.error("No content provided to CreateFileYAML");
+      // console.error("No content provided to CreateFileYAML");
       return;
     }
     const afterV1 = fileName.split("/v1/")[1];
@@ -236,17 +240,24 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "reference",
       (key, element) =>
-        (result.contact = {
-          name: element.value.split("@")[0],
-          url: element.value.split("@")[1],
-        }),
+      { 
+        
+        if (element.value !== undefined && element.value.includes("@")) {
+          const [name, url] = element.value.split("@");
+          result.contact = { name, url };
+        }else{
+          delete result.contact
+        }
+      }
     ],
     [
       "servers",
       (key, element) => {
-        const parts = element.value.split(/\r\n|\n/);
+        console.log("log check ==> ",element.value)
+        let parts = null;
+        element.value != undefined && (parts = element.value.split(/\r\n|\n/)) 
 
-        const newArray = parts.map((item) => item.replace("@", ""));
+        const newArray = (parts != null) && parts.map((item) => item.replace("@", "")) || [];
         result.servers.push(...newArray);
       },
     ],
@@ -285,7 +296,9 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "header",
       (key, element) => {
-        const parsedValue = JSON.parse(element.value);
+        
+        let parsedValue = element.value
+        parsedValue != undefined &&  (parsedValue = JSON.parse(element.value));
 
         if (state.isRequest) {
           result.paths[state.currentUri]["request"] = Object.assign(
@@ -311,26 +324,34 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "body",
       (key, element) => {
-        const parsedValue = JSON.parse(element.value);
-        const bodyDetail = parsedValue;
+      
         if (state.isRequest) {
+          let parsedValue = element.value
+          parsedValue != undefined &&  (parsedValue = JSON.parse(element.value));
+
           result.paths[state.currentUri]["request"] = Object.assign(
             result.paths[state.currentUri]["request"] || {},
             {
-              body: bodyDetail,
+              body: parsedValue,
             }
           );
-          //  console.log("check log  request : ",result.paths[state.currentUri]["request"])
+          // console.log("check log  request : ",result.paths[state.currentUri]["request"])
         }
 
         if (state.isResponse) {
+       
+          let parsedValue = element.value
+          // console.log("onec ==> ",parsedValue)
+       
+          parsedValue !== undefined &&  (parsedValue = JSON.parse(element.value));
+          console.log("two ==> ",parsedValue)
           result.paths[state.currentUri]["response"][state.currentHttpStatus][
             "request"
           ] = {
             ...result.paths[state.currentUri]["response"][
               state.currentHttpStatus
             ]["request"],
-            body: bodyDetail,
+            body: parsedValue,
           };
         }
       },
