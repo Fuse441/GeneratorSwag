@@ -11,7 +11,6 @@ const Func = require("../public/function/func")
 const {
     ReadInit,
     ReplaceData,
-    TransformSheetData
 } = require("../public/function/main");
 
 // Route for JSON to YAML
@@ -51,31 +50,31 @@ router.get('/swaggerUI', (req, res) => {
     }
   });
 });
-router.post("/excel", upload.single("file"), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).send("No file uploaded.");
+router.post("/excel", upload.single("file"), async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send("No file uploaded.");
+        }
+
+        const filePath = req.file.buffer;
+
+        const transformedData = await Func.loopSheets(filePath)
+
+        const fileData = await ReadInit();
+
+        const yamlData = await ReplaceData(fileData, {
+            body: transformedData,
+        });
+
+        res.setHeader("Content-Disposition", 'attachment; filename=SwaggerFile.zip');
+        res.setHeader("Content-Type", "application/zip");
+
+        const archived = await Func.LoopZipFile(yamlData, res)
+        res.end()
+
+    } catch (error) {
+        next(error)
     }
-
-    const filePath = req.file.buffer;
-  
-    const transformedData = await Func.loopSheets(filePath)
-   
-    const fileData = await ReadInit();
-
-    const yamlData  = await ReplaceData(fileData, {
-      body: transformedData,
-    });
-    
-    // console.log("log check yaml data",(util.inspect(yamlData, {showHidden: false, depth: null, colors: true})))
-    // const afterV1 = fileName.split("/v1/")[1] || "default";
-    // const fileNameWithExt = `${afterV1}.yaml`;
-
-    res.setHeader("Content-Disposition", 'attachment; filename="SwaggerFile.zip"');
-    res.setHeader("Content-Type", "application/zip");
-
-    //TODO:
-    const archived = await Func.LoopZipFile(yamlData, res)
-    res.end()
 });
 
 module.exports = router;

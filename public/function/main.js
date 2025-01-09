@@ -6,6 +6,8 @@ const { type } = require("os");
 const e = require("express");
 const Func = require("../function/func");
 const util = require("util");
+const { HTTP_METHOD } = require("../../libs/constant/constant.method");
+const { ValidationError } = require("../../libs/exception/error.validation");
 function ReadInit() {
   return new Promise((resolve, reject) => {
     fs.readFile("swaggers/structured/openapi.json", "utf8", (err, data) => {
@@ -216,17 +218,22 @@ function TransformSheetData(metaSheet, sheetData) {
     currentHttpStatus: null,
     isRequest: false,
     isResponse: false,
+    requestOrResponse: null
   };
   const actions = new Map([
     [
       "tag",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide Tag: ${state.currentMethod} ${state.currentUri}`})
         result.tags.push(element.value);
       },
     ],
     [
       "description",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide ${state.requestOrResponse} Description: ${state.currentMethod} ${state.currentUri}`})
         const description = element.value;
         if (!state.isResponse) {
           result.description = description;
@@ -253,7 +260,8 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "servers",
       (key, element) => {
-        console.log("log check ==> ",element.value)
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide Server: ${state.currentMethod} ${state.currentUri}`})
         let parts = null;
         element.value != undefined && (parts = element.value.split(/\r\n|\n/)) 
 
@@ -264,6 +272,8 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "uri",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide URI: ${state.currentMethod} ${state.currentUri}`})
         result.paths[element.value] = {};
         state.currentUri = element.value;
       },
@@ -271,6 +281,11 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "method",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide Method: ${state.currentUri}`})
+        if(!HTTP_METHOD.includes(element.value))
+            throw new ValidationError({ message: `Invalid Method: ${element.value} ${state.currentUri}. Must be one of [${HTTP_METHOD}]`})
+
         Object.assign(result.paths[state.currentUri], {
           method: element.value,
           tags: result.tags,
@@ -284,6 +299,7 @@ function TransformSheetData(metaSheet, sheetData) {
       (key, element) => {
         state.isRequest = true;
         state.isResponse = false;
+        state.requestOrResponse = "Request"
       },
     ],
     [
@@ -291,11 +307,16 @@ function TransformSheetData(metaSheet, sheetData) {
       (key, element) => {
         state.isResponse = true;
         state.isRequest = false;
+        state.requestOrResponse = "Response"
       },
     ],
     [
       "header",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide ${state.requestOrResponse} Header: ${state.currentMethod} ${state.currentUri}`})
+        if(!Func.isJson(element.value))
+            throw new ValidationError({ message: `Invalid JSON Format ${state.requestOrResponse} Header: ${state.currentMethod} ${state.currentUri} ${element.value}` })
         
         let parsedValue = element.value
         parsedValue != undefined &&  (parsedValue = JSON.parse(element.value));
@@ -326,6 +347,13 @@ function TransformSheetData(metaSheet, sheetData) {
       (key, element) => {
       
         if (state.isRequest) {
+          if(state.currentMethod == "GET")
+            return;
+          if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide ${state.requestOrResponse} Body: ${state.currentMethod} ${state.currentUri}`})
+          if(!Func.isJson(element.value)) 
+            throw new ValidationError({ message: `Invalid JSON Format on ${state.requestOrResponse} Body: ${state.currentMethod} ${state.currentUri} ${element.value}` })
+
           let parsedValue = element.value
           parsedValue != undefined &&  (parsedValue = JSON.parse(element.value));
 
@@ -339,12 +367,12 @@ function TransformSheetData(metaSheet, sheetData) {
         }
 
         if (state.isResponse) {
+          if(!Func.isJson(element.value)) 
+            throw new ValidationError({ message:`Invalid JSON Format on ${state.requestOrResponse} Body: ${state.currentMethod} ${state.currentUri} ${element.value}` })
        
           let parsedValue = element.value
-          // console.log("onec ==> ",parsedValue)
        
           parsedValue !== undefined &&  (parsedValue = JSON.parse(element.value));
-          console.log("two ==> ",parsedValue)
           result.paths[state.currentUri]["response"][state.currentHttpStatus][
             "request"
           ] = {
@@ -359,6 +387,11 @@ function TransformSheetData(metaSheet, sheetData) {
     [
       "http status",
       (key, element) => {
+        if(!!!element.value)
+            throw new ValidationError({ message: `Please Provide ${state.requestOrResponse} HTTP Status: ${state.currentMethod} ${state.currentUri}`})
+        if(isNaN(element?.value))
+            throw new ValidationError({ message: `HTTP Status must be number: ${state.currentMethod} ${state.currentUri}`})
+
         state.currentHttpStatus = element.value;
         result.paths[state.currentUri]["response"] = {
           ...result.paths[state.currentUri]["response"],

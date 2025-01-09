@@ -141,3 +141,16 @@ module.exports.LoopZipFile = async function (files = [], res) {
 
   await archive.finalize();
 };
+
+module.exports.isJson = function (item) {
+
+  let value = typeof item !== "string" ? JSON.stringify(item) : item;
+
+  try {
+    value = JSON.parse(value);
+  } catch (error) {
+    return false;
+  }
+
+  return typeof value === "object" && value !== null;
+}
