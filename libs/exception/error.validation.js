@@ -1,4 +1,4 @@
-export class ValidationError extends Error {
+class ValidationError extends Error {
     constructor({ statusCode = 417, message = "Expectation Failed", details = [] }) {
         super(message);
         this.name = "ValidationError";
@@ -6,4 +6,8 @@ export class ValidationError extends Error {
         this.details = details;
         this.message = message;
     }
+}
+
+module.exports = {
+    ValidationError
 }
