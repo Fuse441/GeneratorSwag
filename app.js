@@ -6,7 +6,9 @@ const { ErrorHandler } = require("./middleware/error.handler");
 app.use(express.json());
 const port = 25565;
 
-const mainRouter = require("./routes/main")
+app.use(express.static("public"));
+
+const mainRouter = require("./routes/main");
 
 app.use("/", mainRouter);
 
