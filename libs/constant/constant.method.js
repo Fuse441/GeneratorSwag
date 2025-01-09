@@ -1,4 +1,4 @@
-export const HTTP_METHOD = [
+module.exports.HTTP_METHOD = [
     'GET',
     'POST',
     'PUT',
