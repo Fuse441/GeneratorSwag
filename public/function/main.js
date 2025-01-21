@@ -85,7 +85,7 @@ async function ReplaceData(content, request) {
           : (newItem = item);
 
         const value = element.paths[key].request.body[item];
-        console.log("log check value req : ",value)
+        // console.log("log check value req : ",value)
         // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
 
         if (Func.cutStarFromObject(item))
@@ -111,6 +111,7 @@ async function ReplaceData(content, request) {
       for (const item in element.paths[key].response) {
         const responseData = {
           description: element.paths[key].response[item].description,
+      
           headers: {},
 
           content: {
@@ -126,7 +127,6 @@ async function ReplaceData(content, request) {
         };
 
         const res = element.paths[key].response[item];
-        //console.log("check res ==> ",res)
         for (const key in res.request.header) {
           const value = res.request.header[key];
           const objectHeader = {
@@ -139,7 +139,6 @@ async function ReplaceData(content, request) {
           };
           responseData.headers[Func.cutStarFormString(key)] = objectHeader;
         }
-        //console.log("check log body : ",res.request.body)
         res.request.body == undefined && (res.request.body = {})
         if (Object.keys(res.request.body).length != 0 && res.request.body != undefined) {
           for (const key in res.request.body) {
@@ -166,7 +165,8 @@ async function ReplaceData(content, request) {
           delete  obj.paths[key][method].requestBody
 
         try {
-          obj.paths[key][method].responses[item] = responseData;
+          obj.paths[key][method].responses[`"${item}"`] = responseData;
+          // console.log(typeof item)
         } catch (error) {
           // console.log("catch : ", error);
         }
@@ -392,7 +392,7 @@ function TransformSheetData(metaSheet, sheetData) {
         if(isNaN(element?.value))
             throw new ValidationError({ message: `HTTP Status must be number: ${state.currentMethod} ${state.currentUri}`})
 
-        state.currentHttpStatus = element.value;
+        state.currentHttpStatus = String(element.value);
         result.paths[state.currentUri]["response"] = {
           ...result.paths[state.currentUri]["response"],
           [element.value]: {},
