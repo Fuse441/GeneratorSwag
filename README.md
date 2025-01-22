@@ -14,8 +14,15 @@
 
 ---
 ## 🏷  TAG Version
+- <h5>1.0.3</h5>
+    fixissue mandatory all request
+- <h5>1.0.2</h5>
+    add Loop check pathParam and fix key has @
+- <h5>1.0.1</h5>
+    Change HttpStatus Response  to String
 - <h5>1.0.0</h5>
     Starter Application Generator Swagger
+
 
 
 ## 🧐 About <a name = "about"></a>
