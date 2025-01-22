@@ -38,9 +38,12 @@ async function ReplaceData(content, request) {
     obj.servers = element.servers.map((item) => ({ url: item }));
     obj.paths = {};
    
-    for (const key in element.paths) {
-      
-      fileName = key;
+    for (let key in element.paths) {
+      console.log(key)
+      var pathUri = key;
+      key.includes("?") && (pathUri = key.replace(/\?.+/gm,""))
+      // console.log(pathUri)
+      fileName = pathUri;
       const method = element.paths[key].method
         .toLowerCase()
         .replace(/['"]+/g, "");
@@ -64,11 +67,23 @@ async function ReplaceData(content, request) {
         },
       };
       obj.paths[key][method].tags = element.paths[key].tags;
-     
+      
       const pathParam = Array.from(key.matchAll(/{(\w+)}/gm))
-
-    
-      pathParam.forEach(item => {
+      const queryParam = Array.from(key.matchAll(/(\w+)=([^&]+)/gm))
+      
+      queryParam.length != 0 && queryParam.forEach(item => {
+        const objectParamerter = {
+          in: "query",
+          name: Func.cutStarFormString(item[1]),
+          schema: {
+            type: typeof item[2],
+          },
+          required: true,
+          description: Func.cutStarFormString(item[2]),
+        };
+        obj.paths[key][method].parameters.push(objectParamerter);
+      })
+      pathParam.length != 0 && pathParam.forEach(item => {
         const objectParamerter = {
           in: "path",
           name: Func.cutStarFormString(item[1]),
@@ -103,15 +118,17 @@ async function ReplaceData(content, request) {
         item.includes("*")
           ? (newItem = item.replace(/\*/g, ""))
           : (newItem = item);
-
+        
         const value = element.paths[key].request.body[item];
-        // console.log("log check value req : ",value)
+        //  console.log("log check value req : ",item)
         // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
-
-        if (Func.cutStarFromObject(item))
+        //  console.log(`${Func.cutStarFromObject(item)} ---- ${item}`)
+        if (Func.cutStarFromObject(item) != item){
+          //  console.log("INBOUND ==> ",item)
           obj.paths[key][method].requestBody.content[
             "application/json"
           ].schema.required.push(newItem);
+        }
 
         obj.paths[key][method].requestBody.content[
           "application/json"
@@ -120,6 +137,7 @@ async function ReplaceData(content, request) {
           newItem
         ] = Func.cutStarFromObject(value);
       }
+      // console.log(obj.paths[key][method].requestBody.content["application/json"].schema.required)
       if (
         obj.paths[key][method].requestBody.content["application/json"].schema
           .required.length == 0
@@ -187,7 +205,8 @@ async function ReplaceData(content, request) {
 
         try {
           obj.paths[key][method].responses[`"${item}"`] = responseData;
-          // console.log(typeof item)
+          //  obj.paths[key]
+
         } catch (error) {
           throw new ValidationError({ message: `${error}`})
 
@@ -200,6 +219,17 @@ async function ReplaceData(content, request) {
     //   "==>",
     //   util.inspect(obj, { showHidden: false, depth: null, colors: true })
     // );
+    if(pathUri.includes("?")){
+    const oldKey = Object.keys(obj.paths)[0]; // ดึง key ที่ต้องเปลี่ยน
+    const newKey = pathUri; // คีย์ใหม่ที่ต้องการ
+    
+    // เปลี่ยนคีย์ภายใน obj.paths
+    obj.paths[newKey] = obj.paths[oldKey];
+    delete obj.paths[oldKey];
+    
+    console.log(obj);
+    }
+
     return obj;
   });
 
