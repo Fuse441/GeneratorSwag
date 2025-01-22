@@ -3,7 +3,7 @@ name: Build and push Docker image to DockerHub
 on:
   push:
     branches: [ "main" ]
-    
+
 jobs:
 
   build:
@@ -17,12 +17,12 @@ jobs:
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
-       username: ${{ secrets.DOCKERHUB_USERNAME }}
-       password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ secrets.DOCKERTHUB_USERNAME }}
+        password: ${{ secrets.DOCKERTHUB_TOKEN }}
 
     - name: Build and push to DockerHub
       uses: docker/build-push-action@v5
       with:
-         context: .
-         push: true
-         tags: ofuseo/githubaction:latest
+        context: .
+        push: true
+        tags: ofuseo/githubaction:latest
