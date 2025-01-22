@@ -16,6 +16,7 @@ module.exports.checkRequest = function (key) {
   }
 };
 
+
 module.exports.cutStarFormString = function (key) {
   if (typeof key == "string" && key.includes("*", 0))
     return key.replace(/\*/g, "");
@@ -133,8 +134,8 @@ module.exports.LoopZipFile = async function (files = [], res) {
     });
 
     yamlData = yamlData.replace(/^( *)@([^:]+):/gm, "$1'@$2':");
-
-    //console.log("log check YAML data:", util.inspect(yamlData, { showHidden: false, depth: null, colors: true }));
+    yamlData = yamlData.replace(/@(\w+)(?=:)/gm,"'@$1'")
+    // console.log("log check YAML data:", util.inspect(yamlData, { showHidden: false, depth: null, colors: true }));
 
     archive.append(yamlData, { name: `${fileName}.yaml` });
   }

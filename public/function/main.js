@@ -37,8 +37,9 @@ async function ReplaceData(content, request) {
     obj.info.contact = element.contact;
     obj.servers = element.servers.map((item) => ({ url: item }));
     obj.paths = {};
-
+   
     for (const key in element.paths) {
+      
       fileName = key;
       const method = element.paths[key].method
         .toLowerCase()
@@ -63,8 +64,27 @@ async function ReplaceData(content, request) {
         },
       };
       obj.paths[key][method].tags = element.paths[key].tags;
+     
+      const pathParam = Array.from(key.matchAll(/{(\w+)}/gm))
+
+    
+      pathParam.forEach(item => {
+        const objectParamerter = {
+          in: "path",
+          name: Func.cutStarFormString(item[1]),
+          schema: {
+            type: typeof item[1],
+          },
+          required: true,
+          description: Func.cutStarFormString(item[1]),
+        };
+        obj.paths[key][method].parameters.push(objectParamerter);
+
+      });
+
 
       for (const item in element.paths[key].request.header) {
+        
         const objectParamerter = {
           in: "header",
           name: Func.cutStarFormString(item),
@@ -152,6 +172,7 @@ async function ReplaceData(content, request) {
             responseData.content["application/json"].example[
               Func.cutStarFormString(key)
             ] = Func.cutStarFromObject(value);
+            
             responseData.content["application/json"].schema.properties[
               Func.cutStarFormString(key)
             ] = Func.nestObject(value);
@@ -168,6 +189,8 @@ async function ReplaceData(content, request) {
           obj.paths[key][method].responses[`"${item}"`] = responseData;
           // console.log(typeof item)
         } catch (error) {
+          throw new ValidationError({ message: `${error}`})
+
           // console.log("catch : ", error);
         }
       }
