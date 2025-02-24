@@ -35,9 +35,11 @@ module.exports.fixJSON = function (jsonString) {
 };
 
 module.exports.cutStarFromObject = function (data) {
+  // console.log(data)
   if (Array.isArray(data)) {
     return data.map((element) => this.cutStarFromObject(element));
   } else if (typeof data === "string") {
+    // console.log(`== > ${data}`)
     return data.replace(/\*/g, "");
   } else if (data && typeof data === "object") {
     const cleanedObject = {};
@@ -53,13 +55,16 @@ module.exports.cutStarFromObject = function (data) {
 };
 
 module.exports.nestObject = function (object, structured = {}) {
+  // console.log(`checkObject ==>  ${JSON.stringify(object)}`)
   if (Array.isArray(object)) {
+    // console.log(`is array ${JSON.stringify(object)}`)
     structured = {
       type: "array",
       items: {},
     };
 
     if (object.length > 0) {
+    
       structured.items = this.nestObject(object[0]);
     }
     return structured;
@@ -72,7 +77,7 @@ module.exports.nestObject = function (object, structured = {}) {
 
     for (const key in object) {
       const cleanKey = this.cutStarFormString(key);
-
+      // console.log(`==> ${key}`)
       if (key.startsWith("*")) {
         structured.required.push(cleanKey);
       }
