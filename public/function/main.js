@@ -85,10 +85,10 @@ async function ReplaceData(content, request) {
           : (newItem = item);
 
         const value = element.paths[key].request.body[item];
-        console.log("log check value req : ",value)
+        console.log("log check value req : ",item)
         // console.log("log nest : ", JSON.stringify(Func.nestObject(value)))
 
-        if (Func.cutStarFromObject(item))
+        if (item.includes("*") && Func.cutStarFromObject(item))
           obj.paths[key][method].requestBody.content[
             "application/json"
           ].schema.required.push(newItem);
@@ -99,6 +99,9 @@ async function ReplaceData(content, request) {
         obj.paths[key][method].requestBody.content["application/json"].example[
           newItem
         ] = Func.cutStarFromObject(value);
+        console.log(obj.paths[key][method].requestBody.content[
+          "application/json"
+        ].schema.required)
       }
       if (
         obj.paths[key][method].requestBody.content["application/json"].schema
