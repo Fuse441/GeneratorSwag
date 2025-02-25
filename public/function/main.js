@@ -32,6 +32,7 @@ async function ReplaceData(content, request) {
     const obj = JSON.parse(JSON.stringify(content));
     let fileName = "";
     obj.info.title = element.title;
+    
     obj.info.version = element.version;
     obj.info.description = element.description;
     obj.info.contact = element.contact;
@@ -39,10 +40,10 @@ async function ReplaceData(content, request) {
     obj.paths = {};
    
     for (let key in element.paths) {
-      console.log(key)
+     
       var pathUri = key;
       key.includes("?") && (pathUri = key.replace(/\?.+/gm,""))
-      // console.log(pathUri)
+     
       fileName = pathUri;
       const method = element.paths[key].method
         .toLowerCase()
@@ -111,10 +112,11 @@ async function ReplaceData(content, request) {
         };
         obj.paths[key][method].parameters.push(objectParamerter);
       }
-      //console.log("log check ==>" ,element.paths[key].request.body)
+      !element.paths[key].request.body && (() => { throw new ValidationError({ message: `temp` }) })();
       for (const item in element.paths[key].request.body) {
-        
+       
         let newItem;
+      
         item.includes("*")
           ? (newItem = item.replace(/\*/g, ""))
           : (newItem = item);
@@ -136,9 +138,7 @@ async function ReplaceData(content, request) {
         obj.paths[key][method].requestBody.content["application/json"].example[
           newItem
         ] = Func.cutStarFromObject(value);
-        console.log(obj.paths[key][method].requestBody.content[
-          "application/json"
-        ].schema.required)
+   
       }
       // console.log(obj.paths[key][method].requestBody.content["application/json"].schema.required)
       if (
@@ -211,7 +211,7 @@ async function ReplaceData(content, request) {
           //  obj.paths[key]
 
         } catch (error) {
-          throw new ValidationError({ message: `${error}`})
+          throw new ValidationError({ message: ` ${error}`})
 
           // console.log("catch : ", error);
         }
@@ -230,7 +230,7 @@ async function ReplaceData(content, request) {
     obj.paths[newKey] = obj.paths[oldKey];
     delete obj.paths[oldKey];
     
-    console.log(obj);
+   
     }
 
     return obj;
@@ -257,7 +257,11 @@ function CreateFileYAML(content, fileName) {
 }
 
 function TransformSheetData(metaSheet, sheetData) {
+  // console.log("in come")
+// console.log("metaSheet ==> ", metaSheet);
+  
   const [title, version] = metaSheet;
+
   const result = {
     title: title,
     version: version,

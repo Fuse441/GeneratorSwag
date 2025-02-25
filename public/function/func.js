@@ -99,19 +99,29 @@ module.exports.loopSheets = async function (filePath) {
   const workbook = XLSX.read(filePath);
   const sheetArray = workbook.SheetNames;
 
-  const resultPromises = sheetArray.map(async (sheetName, index) => {
-    //console.log(sheetName);
+  const resultPromises = sheetArray
+  .filter((item) => item.includes("-"))
+  .map(async (sheetName, index) => {
+   
+    const sheet = workbook.Sheets[sheetName];
+    if (!sheet) {
+      console.warn(`Sheet not found: ${sheetName}`);
+      return null; 
+    }
 
-    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const sheetData = XLSX.utils.sheet_to_json(sheet);
     const metaSheet = sheetName.split("-");
 
-    const transformedData = TransformSheetData(metaSheet, sheetData);
-    // console.log("check : ",transformedData)
 
-    return transformedData;
+      const transformedData = TransformSheetData(metaSheet, sheetData);
+      console.log("transformedData ==> ", transformedData);
+      return transformedData;
+   
   });
 
+
   const results = await Promise.all(resultPromises);
+  console.log("results ==> ", results);
 
   return results;
 };
@@ -140,6 +150,7 @@ module.exports.LoopZipFile = async function (files = [], res) {
 
     yamlData = yamlData.replace(/^( *)@([^:]+):/gm, "$1'@$2':");
     yamlData = yamlData.replace(/@(\w+)(?=:)/gm,"'@$1'")
+
     // console.log("log check YAML data:", util.inspect(yamlData, { showHidden: false, depth: null, colors: true }));
 
     archive.append(yamlData, { name: `${fileName}.yaml` });
