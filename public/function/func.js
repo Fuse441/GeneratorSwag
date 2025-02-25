@@ -114,7 +114,7 @@ module.exports.loopSheets = async function (filePath) {
 
 
       const transformedData = TransformSheetData(metaSheet, sheetData);
-      console.log("transformedData ==> ", transformedData);
+      // console.log("transformedData ==> ", transformedData);
       return transformedData;
    
   });
