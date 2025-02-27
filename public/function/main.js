@@ -74,7 +74,7 @@ async function ReplaceData(content, request) {
      
       
       queryParam.length != 0 && queryParam.forEach(item => {
-      console.log("item ==> ", item);
+      
       
         const objectParamerter = {
           in: "query",
