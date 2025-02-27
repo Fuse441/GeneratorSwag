@@ -35,11 +35,11 @@ module.exports.fixJSON = function (jsonString) {
 };
 
 module.exports.cutStarFromObject = function (data) {
-  // console.log(data)
+  // 
   if (Array.isArray(data)) {
     return data.map((element) => this.cutStarFromObject(element));
   } else if (typeof data === "string") {
-    // console.log(`== > ${data}`)
+    // 
     return data.replace(/\*/g, "");
   } else if (data && typeof data === "object") {
     const cleanedObject = {};
@@ -55,9 +55,9 @@ module.exports.cutStarFromObject = function (data) {
 };
 
 module.exports.nestObject = function (object, structured = {}) {
-  // console.log(`checkObject ==>  ${JSON.stringify(object)}`)
+  // 
   if (Array.isArray(object)) {
-    // console.log(`is array ${JSON.stringify(object)}`)
+    // 
     structured = {
       type: "array",
       items: {},
@@ -77,7 +77,7 @@ module.exports.nestObject = function (object, structured = {}) {
 
     for (const key in object) {
       const cleanKey = this.cutStarFormString(key);
-      // console.log(`==> ${key}`)
+      // 
       if (key.startsWith("*")) {
         structured.required.push(cleanKey);
       }
@@ -114,14 +114,14 @@ module.exports.loopSheets = async function (filePath) {
 
 
       const transformedData = TransformSheetData(metaSheet, sheetData);
-      // console.log("transformedData ==> ", transformedData);
+      // 
       return transformedData;
    
   });
 
 
   const results = await Promise.all(resultPromises);
-  console.log("results ==> ", results);
+  
 
   return results;
 };
@@ -151,7 +151,7 @@ module.exports.LoopZipFile = async function (files = [], res) {
     yamlData = yamlData.replace(/^( *)@([^:]+):/gm, "$1'@$2':");
     yamlData = yamlData.replace(/@(\w+)(?=:)/gm,"'@$1'")
 
-    // console.log("log check YAML data:", util.inspect(yamlData, { showHidden: false, depth: null, colors: true }));
+    // 
 
     archive.append(yamlData, { name: `${fileName}.yaml` });
   }
