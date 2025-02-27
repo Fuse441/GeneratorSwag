@@ -42,7 +42,6 @@ async function ReplaceData(content, request) {
     for (let key in element.paths) {
      
       var pathUri = key;
-      key.includes("?") && (pathUri = key.replace(/\?.+/gm,""))
      
       fileName = pathUri;
       const method = element.paths[key].method
@@ -70,16 +69,20 @@ async function ReplaceData(content, request) {
       obj.paths[key][method].tags = element.paths[key].tags;
       
       const pathParam = Array.from(key.matchAll(/{(\w+)}/gm))
-      const queryParam = Array.from(key.matchAll(/(\w+)=([^&]+)/gm))
+      const queryParam = Array.from(key.matchAll(/(\*?\w+)=([^&]+)/gm))
+     
+     
       
       queryParam.length != 0 && queryParam.forEach(item => {
+      console.log("item ==> ", item);
+      
         const objectParamerter = {
           in: "query",
           name: Func.cutStarFormString(item[1]),
           schema: {
             type: typeof item[2],
           },
-          required: false,
+          required: item[1].includes("*"),
           description: Func.cutStarFormString(item[2]),
         };
         obj.paths[key][method].parameters.push(objectParamerter);
@@ -219,16 +222,8 @@ async function ReplaceData(content, request) {
     }
 
   
-    if(pathUri.includes("?")){
-    const oldKey = Object.keys(obj.paths)[0]; 
-    const newKey = pathUri; 
+  
     
-      
-    obj.paths[newKey] = obj.paths[oldKey];
-    delete obj.paths[oldKey];
-    
-   
-    }
 
     return obj;
   });
@@ -275,7 +270,8 @@ function TransformSheetData(metaSheet, sheetData) {
     currentHttpStatus: null,
     isRequest: false,
     isResponse: false,
-    requestOrResponse: null
+    requestOrResponse: null,
+    startQuery : null
   };
   const actions = new Map([
     [
@@ -305,7 +301,9 @@ function TransformSheetData(metaSheet, sheetData) {
       "reference",
       (key, element) =>
       { 
-        
+        if(!!!element.value)
+          throw new ValidationError({ message: `Invalid template in Sheet ${title} :  ${key}`,details : `${element.value} must be String@Link`})
+
         if (element.value !== undefined && element.value.includes("@")) {
           const [name, url] = element.value.split("@");
           result.contact = { name, url };
@@ -331,8 +329,28 @@ function TransformSheetData(metaSheet, sheetData) {
       (key, element) => {
         if(!!!element.value)
             throw new ValidationError({ message: `Please Provide URI: ${state.currentMethod} ${state.currentUri}`})
-        result.paths[element.value] = {};
         state.currentUri = element.value;
+      },
+    ],
+    [
+      "query",
+      (key, element) => {
+   
+
+        
+        if(!!!element.value || !element.value.includes("="))
+          throw new ValidationError({ message: `Error Format Query String` , details : `${key} : ${element.value}`})
+
+          if(!state.startQuery){
+            state.currentUri &&= state.currentUri.concat("?",element.value)
+            state.startQuery ||= true
+
+          }else{
+            state.currentUri &&= state.currentUri.concat("&",element.value)
+            
+          }
+          
+       
       },
     ],
     [
@@ -341,8 +359,8 @@ function TransformSheetData(metaSheet, sheetData) {
         if(!!!element.value)
             throw new ValidationError({ message: `Please Provide Method: ${state.currentUri}`})
         if(!HTTP_METHOD.includes(element.value))
-            throw new ValidationError({ message: `Invalid Method: ${element.value} ${state.currentUri}. Must be one of [${HTTP_METHOD}]`})
-
+            throw new ValidationError({ message: `Invalid Method: ${element.value}`,details : `Must be one of [${HTTP_METHOD}]`})
+        result.paths[state.currentUri] = {};
         Object.assign(result.paths[state.currentUri], {
           method: element.value,
           tags: result.tags,

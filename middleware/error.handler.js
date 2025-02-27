@@ -1,12 +1,14 @@
 const ResponseFormatter = require('../libs/api/http.response-formatter');
 
 const ErrorHandler = (error, req, res, next) => {
+
     switch (error.name) {
         case 'ValidationError':
             return ResponseFormatter.error({
                 response: res,
                 error: error,
-                statusCode: 417
+                statusCode: error.statusCode,
+                detail : error.details
             });
         default:
             return ResponseFormatter.error({

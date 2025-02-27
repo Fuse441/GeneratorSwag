@@ -4,9 +4,10 @@ function success({ response, data, message = "Success", statusCode = 200 }) {
     })
 }
 
-function error({ response, error, statusCode = 500 }) {
+function error({ response, error, statusCode = 500,detail = ""}) {
     return response.status(statusCode).json({
         message: error.message,
+        detail: detail
     });
 }
 
