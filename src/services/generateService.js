@@ -1,11 +1,9 @@
-const users = [];
+const OpenAPIBuilder = require('../builders/openAPIBuilder');
 
-exports.fetchUsers = async () => {
-  return users;
+exports.init = async () => {
+  const builder = new OpenAPIBuilder();
+  const getSpec = await builder.getSpec();
+  return getSpec;
 };
 
-exports.addUser = async (data) => {
-  const newUser = { id: Date.now(), ...data };
-  users.push(newUser);
-  return newUser;
-};
+

@@ -1,7 +1,0 @@
-{
-    "500": {
-        "httpStatus": 500,
-        "resultCode": "50003",
-        "developerMessage": "Connection Error"
-    }
-}
