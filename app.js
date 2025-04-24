@@ -2,26 +2,18 @@
 const express = require('express');
 const app = express();
 const YAML = require('json-to-pretty-yaml');
+const config = require('./src/configs/index')
+const generateRoute = require('./src/routes/generateBE')
 
-app.use(express.json());
 const port = 25565;
 const { ReadInit, CreateFileYAML, ReplaceData } = require('./public/function/main'); 
+const logger = require('./src/middlewares/logger');
 
-app.post('/', async (req, res) => {
-    try {
-        const fileData = await ReadInit(); 
-    // console.log(req.body.title);
-     const {yamlData,fileName} = ReplaceData(fileData,req)
-    //  console.log(yamlData, fileName);
-     CreateFileYAML(yamlData,fileName);
-   
-        res.send({message : "YAML file created successfully"});
-    } catch (error) {
-        console.error("Error processing file:", error); 
-        res.status(500).send({ message: "Error reading file", error: error.message });
-    }
-});
+app.use(express.json());
+app.use(logger)
+app.use(generateRoute)
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+
+app.listen(config.PORT, () => {
+    console.log(`Example app listening on port ${config.PORT}`);
 });
