@@ -1,39 +1,35 @@
-# 1. base image
-FROM oven/bun:1 AS base
+# syntax=docker/dockerfile:1
+
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
+
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+
+ARG NODE_VERSION=20.17.0
+
+FROM node:${NODE_VERSION}-alpine
+
+# Use production node environment by default.
+ENV NODE_ENV production
+
+
 WORKDIR /app
 
-# 2. install dependencies (dev)
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.npm to speed up subsequent builds.
+# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
+# into this layer.
+COPY package.json package-lock.json ./
 
-# 3. install dependencies (production)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+RUN npm install 
 
-# 4. copy source + dev dependencies + build
-FROM base AS build
-COPY --from=install /temp/dev/node_modules node_modules
+
+# Copy the rest of the source files into the image.
 COPY . .
-RUN bun run build
 
-# 5. final production image
-FROM base AS release
-WORKDIR /app
-
-# copy production dependencies
-COPY --from=install /temp/prod/node_modules node_modules
-
-
-COPY --from=build /app/dist ./dist
-
-# copy package.json (ถ้าต้องใช้)
-COPY --from=build /app/package.json .
-
-
+# Expose the port that the application listens on.
 EXPOSE 25565
 
-
-ENTRYPOINT ["bun", "run", "dist/app.js"]
+# Run the application.
+CMD node app.js
