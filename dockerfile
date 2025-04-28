@@ -1,35 +1,42 @@
-# syntax=docker/dockerfile:1
-
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
-ARG NODE_VERSION=20.17.0
-
-FROM node:${NODE_VERSION}-alpine
-
-# Use production node environment by default.
-ENV NODE_ENV production
-
-
+# 1. base image
+FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
-# into this layer.
-COPY package.json package-lock.json ./
+# 2. install dependencies (dev)
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-RUN npm install 
+# 3. install dependencies (production)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-
-# Copy the rest of the source files into the image.
+# 4. copy source + dev dependencies + build
+FROM base AS build
+COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
+RUN bun run build
 
-# Expose the port that the application listens on.
+# 5. final production image
+FROM base AS release
+WORKDIR /app
+
+# copy production dependencies
+COPY --from=install /temp/prod/node_modules node_modules
+
+# copy built js files (สมมติ build output อยู่ใน dist/)
+COPY --from=build /app/dist ./dist
+
+# copy package.json (ถ้าต้องใช้)
+COPY --from=build /app/package.json .
+
+# ลบไฟล์ไม่จำเป็น? (ไม่ต้อง copy src เพราะ build แล้ว)
+# และลบไฟล์ TypeScript ต่างๆ ที่ไม่จำเป็นใน final image
+# วิธีนี้คือไม่ต้อง copy src/ มาด้วยเลย
+
 EXPOSE 25565
 
-# Run the application.
-CMD node app.js
+# รันไฟล์ js ที่ build แล้ว (เช่น dist/app.js)
+ENTRYPOINT ["bun", "run", "dist/app.js"]
