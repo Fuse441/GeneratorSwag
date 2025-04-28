@@ -110,7 +110,7 @@ export class OpenAPIBuilder {
         description: res.description || '',
         headers: headerObj,
         content,
-      };
+      };  
     }
   }
   
